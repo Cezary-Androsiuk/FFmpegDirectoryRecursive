@@ -5,6 +5,9 @@ It is a twin project to [FFmpegDirectory](https://github.com/Cezary-Androsiuk/FF
 Installation instructions are in ```main.cpp```, but it requires FFmpeg to be already installed. 
 Check out [FFmpegDirectory](https://github.com/Cezary-Androsiuk/FFmpegDirectory) for more screenshots!
 
+Unlike FFmpegDirectory, this algorithm creates a parallel directory that will contain an identical structure to the one specified by the user but with compressed recordings.
+I chose a fixed number of arguments (instead of variable and more flexible) to force the user to actively decide what to do with files that already have H.265 encryption and what file extensions to consider.
+
 ## Input Files:
 ![inFiles](https://github.com/Cezary-Androsiuk/FFmpegDirectoryRecursive/blob/master/images/inFiles.png "inFiles") 
 
