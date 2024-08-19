@@ -9,15 +9,15 @@
 #include "cpp/enums/SkipAction.hpp"
 
 // compile:
-// g++ main.cpp cpp\MainMethods.cpp cpp\FFExecute.cpp cpp\FFTester.cpp cpp\ListMaker.cpp -o ffmpegDir.exe
+// g++ main.cpp cpp\MainMethods.cpp cpp\FFExecute.cpp cpp\FFTester.cpp cpp\ListMaker.cpp -o ffmpegRec.exe
 
-// instalation(add ffmpegDir.exe to PATH environment):
+// instalation(add ffmpegRec.exe to PATH environment):
 // 1 in windows search type "Edit the system environment variables" 
 // 2 press "Environment Variables..." button
 // 3 in bottom part (System variables) find variable named "Path" and double click on it
 // 4 press on the right site the "New" button and type path to directory, where executable file (created after compilation) is located
-// in example path to this executable (for now) is "D:\vscode\c++\projects\FFmpegDirectory"
-// now, you can open cmd in any directory and just in command prompt type "ffmpegDir . mkv+mp4"
+// in example path to this executable (for now) is "D:\vscode\c++\projects\FFmpegDirectoryRecursive"
+// now, you can open cmd in any directory and just in command prompt type "ffmpegRec . mkv+mp4"
 
 #define FLEXIBLE_ARGUMENTS false
 
