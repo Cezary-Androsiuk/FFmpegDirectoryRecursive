@@ -35,7 +35,7 @@ int main(int argc, const char **argv)
     {
         fprintf(stderr, COLOR_RESET "Arguments are not valid:" COLOR_RED " %s\n" COLOR_RESET, lastError.c_str());
         fprintf(stderr, "Expected none, one, two or three arguments!\n");
-        printf("ffmpegDir :1 :2 :3\n");
+        printf("ffmpegRec :1 :2 :3\n");
         printf("  :1 - path to execute ffmpeg in it\n");
         printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
         printf("  :3 - action when file is already H265 [skip/copy/move]\n");
@@ -47,7 +47,7 @@ int main(int argc, const char **argv)
     {
         fprintf(stderr, COLOR_RESET "Arguments are not valid:" COLOR_RED " %s\n" COLOR_RESET, lastError.c_str());
         fprintf(stderr, "Expected three arguments!\n");
-        printf("ffmpegDir :1 :2 :3\n");
+        printf("ffmpegRec :1 :2 :3\n");
         printf("  :1 - path to execute ffmpeg in it\n");
         printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
         printf("  :3 - action when file is already H265 [skip/copy/move]\n");

@@ -1,21 +1,25 @@
-# FFmpegDirectory
+# FFmpegDirectoryRecursive
+
+## About
+It is a twin project to [FFmpegDirectory](https://github.com/Cezary-Androsiuk/FFmpegDirectory), but upgraded to handle recursive directories.
+Installation instructions are in ```main.cpp```, but it requires FFmpeg to be already installed. 
+Check out [FFmpegDirectory](https://github.com/Cezary-Androsiuk/FFmpegDirectory) for more screenshots!
+
+## Input Files:
+![inFiles](https://github.com/Cezary-Androsiuk/FFmpegDirectoryRecursive/blob/master/images/inFiles.png "inFiles") 
+
+## Command Prompt Output
+![display1](https://github.com/Cezary-Androsiuk/FFmpegDirectoryRecursive/blob/master/images/display1.png "display1") 
+
+## Output Files:
+![outFiles](https://github.com/Cezary-Androsiuk/FFmpegDirectoryRecursive/blob/master/images/outFiles.png "outFiles")
 
 
-![p0](https://github.com/Cezary-Androsiuk/FFmpegDirectory/blob/master/images/p0.png "p0") 
+## Invalid arguments
+You can also change the value of the definition of ```FLEXIBLE_ARGUMENTS``` to ```true``` to get a floating number of arguments. In that case, the default values will be used.
+![display2](https://github.com/Cezary-Androsiuk/FFmpegDirectoryRecursive/blob/master/images/display2.png "display2") 
 
+## Catalog Occupied
+![display3](https://github.com/Cezary-Androsiuk/FFmpegDirectoryRecursive/blob/master/images/display3.png "display3") 
 
-## Skip
-![p1-skip](https://github.com/Cezary-Androsiuk/FFmpegDirectory/blob/master/images/p1-skip.png "p1-skip")
-
-## Copy
-![p1-copy](https://github.com/Cezary-Androsiuk/FFmpegDirectory/blob/master/images/p1-copy.png "p1-copy") 
-
-## Move 
-![p1-move](https://github.com/Cezary-Androsiuk/FFmpegDirectory/blob/master/images/p1-move.png "p1-move") 
-
-
-![p2](https://github.com/Cezary-Androsiuk/FFmpegDirectory/blob/master/images/p2.png "p2") 
-
-
-## Test files:
-![p3](https://github.com/Cezary-Androsiuk/FFmpegDirectory/blob/master/images/p3.png "p3") 
+The algorithm is armed with many more tools to protect and facilitate file compression. As soon as I find time to do so, I will describe the operation of both algorithms.
