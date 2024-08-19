@@ -207,6 +207,46 @@ bool createOutputDirectory(fs::path outDirectory)
     return true;
 }
 
+bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
+{
+    FUNC_START
+
+    str sourceStr = sourceDir.string();
+    str targetStr = targetDir.string();
+
+    for(const auto &file : fs::recursive_directory_iterator(sourceDir))
+    {
+        if(!file.is_directory())
+            continue;
+
+        str directoryStr = fs::absolute(file.path()).string();
+        if(directoryStr == sourceStr)
+            continue;
+        
+        size_t startPos = directoryStr.find(sourceStr);
+        if(startPos == str::npos)
+        {
+            lastError = "Error while looking for string '" + sourceStr + "' in '" + directoryStr + "'\n";
+            return false;
+        }
+        directoryStr.erase(startPos, sourceStr.size()+1);
+        fs::path directoryToCreate = targetDir / directoryStr;
+        if(fs::exists(directoryToCreate))
+            continue;
+        
+        try{
+            fs::create_directories(directoryToCreate);
+        }
+        catch(std::filesystem::filesystem_error &e)
+        {
+            lastError = "Error while creating directory: " + directoryToCreate.string() + "! Error: " + e.what();
+            return false;
+        }
+    }
+
+    return true;
+}
+
 fs::path createOutputFilename(cpath inFile, cpath outDirectory)
 {
     str filename = inFile.filename().string();

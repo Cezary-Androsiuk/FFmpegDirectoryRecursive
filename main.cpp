@@ -8,7 +8,6 @@
 #include "cpp/ListMaker.hpp"
 #include "cpp/enums/SkipAction.hpp"
 
-// find better place to store FFmpeg_output-xxxxx_xxxxxx.txt
 // locate files recursive
 
 // compile:
@@ -66,6 +65,12 @@ int main(int argc, const char **argv)
     if(!createOutputDirectory( outDirectory ))
     {
         fprintf(stderr, COLOR_RESET "Failed while creating output directory:" COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+        return 1;
+    }
+
+    if(!copyStructureOfFolders(directory, outDirectory))
+    {
+        fprintf(stderr, COLOR_RESET "Failed while creating structure of folders in output directory:" COLOR_RED " %s" COLOR_RESET, lastError.c_str());
         return 1;
     }
 
