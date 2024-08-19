@@ -16,14 +16,19 @@ vpath ListMaker::listOfFiles(cpath path, cvstr acceptableExtensions)
 {
     vpath list;
     int index = 0;
-    for(const auto &file : std::filesystem::directory_iterator(path))
+    for(const auto &file : std::filesystem::recursive_directory_iterator(path))
     {
-        ++index;
+        // printf("\ntesting: %s\n", file.path().string().c_str());
         if(!file.is_regular_file())
             continue;
+        ++index;
 
         str extension = file.path().extension().string();
-        extension.erase(0, 1); // remove dot
+        if(!extension.empty())
+        {
+            if(extension[0] == '.')
+                extension.erase(0, 1); // remove dot
+        }
         
         if(vectorContains(acceptableExtensions, extension))
         {

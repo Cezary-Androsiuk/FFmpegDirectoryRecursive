@@ -57,7 +57,6 @@ int main(int argc, const char **argv)
 #endif
 
     printf("Selected directory: %s\n", directory.string().c_str());
-    printf("Found files:\n");
     
     fs::path outDirectory( directory.string() + "-ffmpeg-h.265" );
     // printf(COLOR_RED "DEBUG ONLY!" COLOR_RESET "\n");
@@ -74,7 +73,8 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    vpath listOfFiles = ListMaker::listOfFiles(directory, extensions);
+    printf("Found files:\n");
+    vpath listOfFiles = ListMaker::listOfFiles(directory, extensions); // listOfFiles prints
 
     FFExecute::setTotalFFmpegsToPerform(listOfFiles.size());
     FFExecute::setSkipAction(skipAction);
@@ -90,16 +90,15 @@ int main(int argc, const char **argv)
 
     str filesProgress = FFExecute::makeFileProgressPostfix();
     printf("Status: [ %s ]\n\n", filesProgress.c_str()); 
-
     for(const auto &inFile : listOfFiles)
     {
         // all files in list are valid at this point
-        fs::path outFile = createOutputFilename(inFile, outDirectory);
+        fs::path outFile = createOutputFilename(inFile, directory, outDirectory);
         FFExecute::runFFmpeg(inFile.string(), outFile.string());
     }
 
 
-    deleteDirectoryIfEmpty(outDirectory);
+    // deleteDirectoryIfEmpty(outDirectory);
 
     printf("Finished all FFmpegs!\n");
 }

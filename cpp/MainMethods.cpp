@@ -170,8 +170,15 @@ bool isDirectoryEmpty(fs::path directory)
 {
     // should be an directory at this point, then no checking
 
-    // very fancy way to check it xd (by Gemini)
-    return fs::directory_iterator(directory) == fs::directory_iterator();
+    for(const auto &file : fs::recursive_directory_iterator(directory))
+    {
+        if(file.is_directory())
+            continue;
+
+        // if not directory, then must be a file => is not empty
+        return false;
+    }
+    return true;
 }
 
 bool createOutputDirectory(fs::path outDirectory)
@@ -193,15 +200,18 @@ bool createOutputDirectory(fs::path outDirectory)
             lastError = "Output directory already exist, and is not empty: " + outDirectory.string();
             return false;
         }
+
+        // if is empty (not contains files) delete it anyway, it might contains empty folders, that are not exist in inputDirectory
+        // directory contains only empty folders at this point
+        fs::remove_all( outDirectory );
+
     }
-    else
+
+    // "ffmpeg-h.265" not exist, now try to create it
+    if(!fs::create_directory( outDirectory ))
     {
-        // "ffmpeg-h.265" not exist, now try to create it
-        if(!fs::create_directory( outDirectory ))
-        {
-            lastError = "Failed while creating output directory: " + outDirectory.string();
-            return false;
-        }
+        lastError = "Failed while creating output directory: " + outDirectory.string();
+        return false;
     }
 
     return true;
@@ -230,6 +240,7 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
             return false;
         }
         directoryStr.erase(startPos, sourceStr.size()+1);
+        
         fs::path directoryToCreate = targetDir / directoryStr;
         if(fs::exists(directoryToCreate))
             continue;
@@ -244,17 +255,35 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
         }
     }
 
+    printf("Structure of folders created\n");
+
     return true;
 }
 
-fs::path createOutputFilename(cpath inFile, cpath outDirectory)
+fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory)
 {
-    str filename = inFile.filename().string();
+    // replace extension to mp4 (works then i won't change it to filesystem way)
+    str newFilename = inFile.filename().string();
+    size_t dotPos = newFilename.find_last_of('.');
+    // if file name not contains any dot => no extension also
+    newFilename = dotPos == str::npos ? newFilename : newFilename.substr(0, dotPos);
+    str changedInFile = (inFile.parent_path() / (newFilename + ".mp4")).string();
 
-    size_t dotPos = filename.find_last_of('.');
-    if(dotPos == str::npos)
-        return outDirectory / (filename + ".mp4");
-    return outDirectory / (filename.substr(0, dotPos+1) + "mp4");
+    // change to output directory
+    size_t startPos = changedInFile.find(directory.string());
+    if(startPos == str::npos)
+    {
+        printf(COLOR_RED "WTF!\n'%s' SHOULD EXIST IN '%s'\n" COLOR_RESET, directory.string().c_str(), changedInFile.c_str());
+        printf("EXIT FROM %s\n", __PRETTY_FUNCTION__);
+        exit(1);
+    }
+    changedInFile.erase(startPos, directory.string().size());
+    if(!changedInFile.empty())
+    {
+        if(changedInFile[0] == '\\' || changedInFile[0] == '/')
+            changedInFile.erase(0,1);
+    }
+    return outDirectory / changedInFile;
 }
 
 void deleteDirectoryIfEmpty(fs::path outDirectory)
@@ -267,7 +296,8 @@ void deleteDirectoryIfEmpty(fs::path outDirectory)
 
         if(isDirectoryEmpty( outDirectory ))
         {
-            fs::remove( outDirectory );
+            // directory contains only empty folders at this point
+            fs::remove_all( outDirectory );
         }
     }
 }

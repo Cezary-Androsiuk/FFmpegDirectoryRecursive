@@ -46,7 +46,7 @@ bool argsValidFlexible(int argc, const char **argv, fs::path *const directory, v
 bool isDirectoryEmpty(fs::path directory);
 bool createOutputDirectory(fs::path outDirectory);
 bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir);
-fs::path createOutputFilename(cpath inFile, cpath outDirectory);
+fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory);
 
 void deleteDirectoryIfEmpty(fs::path outDirectory);
 bool rm_all(const fs::path& path);
