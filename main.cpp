@@ -58,7 +58,7 @@ int main(int argc, const char **argv)
     printf("Selected directory: %s\n", directory.string().c_str());
     printf("Found files:\n");
     
-    fs::path outDirectory( directory / "ffmpeg-h.265" );
+    fs::path outDirectory( directory.string() + "-ffmpeg-h.265" );
     // printf(COLOR_RED "DEBUG ONLY!" COLOR_RESET "\n");
     // rm_all(outDirectory);
     if(!createOutputDirectory( outDirectory ))
