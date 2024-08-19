@@ -8,6 +8,9 @@
 #include "cpp/ListMaker.hpp"
 #include "cpp/enums/SkipAction.hpp"
 
+// find better place to store FFmpeg_output-xxxxx_xxxxxx.txt
+// locate files recursive
+
 // compile:
 // g++ main.cpp cpp\MainMethods.cpp cpp\FFExecute.cpp cpp\FFTester.cpp cpp\ListMaker.cpp -o ffmpegRec.exe
 
@@ -52,7 +55,6 @@ int main(int argc, const char **argv)
 
         return 1;
     }
-
 #endif
 
     printf("Selected directory: %s\n", directory.string().c_str());
@@ -71,6 +73,7 @@ int main(int argc, const char **argv)
 
     FFExecute::setTotalFFmpegsToPerform(listOfFiles.size());
     FFExecute::setSkipAction(skipAction);
+    FFExecute::setffOFileDirectory(directory);
     
     str skippedText;
     if(skipAction == SkipAction::Skip) skippedText = "skipped";

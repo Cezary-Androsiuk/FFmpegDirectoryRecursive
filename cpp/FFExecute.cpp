@@ -9,6 +9,7 @@ SkipAction FFExecute::m_skipAction = SkipAction::Skip;
 
 std::ofstream FFExecute::m_ffOFile;
 str FFExecute::m_ffOFileName;
+fs::path FFExecute::m_ffOFileDirectory;
 str FFExecute::m_strDuration;
 
 void FFExecute::handleOutput(cstr line)
@@ -96,7 +97,7 @@ void FFExecute::openFFOFile()
     if(m_ffOFileName.empty())
         m_ffOFileName = FFMPEG_OUTPUT_FILE(FFExecute::getCurrentTime());
 
-    m_ffOFile = std::ofstream(m_ffOFileName, std::ios::app);
+    m_ffOFile = std::ofstream((m_ffOFileDirectory / m_ffOFileName), std::ios::app);
     if(!m_ffOFile.good())
     {
         // i won't fuck with that here...
@@ -329,6 +330,11 @@ void FFExecute::setTotalFFmpegsToPerform(int count)
 void FFExecute::setSkipAction(SkipAction skipAction)
 {
     m_skipAction = skipAction;
+}
+
+void FFExecute::setffOFileDirectory(fs::path directory)
+{
+    m_ffOFileDirectory = directory;
 }
 
 void FFExecute::runFFmpeg(cstr inFile, cstr outFile)

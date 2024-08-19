@@ -59,6 +59,7 @@ public:
     static str makeFileProgressPostfix(bool addColors = true);
     static void setTotalFFmpegsToPerform(int count);
     static void setSkipAction(SkipAction skipAction);
+    static void setffOFileDirectory(fs::path directory);
     static void runFFmpeg(cstr inFile, cstr outFile);
 
 private:
@@ -71,6 +72,7 @@ private:
     
     static std::ofstream m_ffOFile; // ffOFile is FFmpegOutputFile
     static str m_ffOFileName; // ffOFile is FFmpegOutputFile
+    static fs::path m_ffOFileDirectory;
     static str m_strDuration;
 };
 
