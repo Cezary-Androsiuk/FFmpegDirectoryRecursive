@@ -46,9 +46,13 @@ class FFTester
 public:
     static bool canBeConvertedToH265(cstr filePath); // returns true if file is h265
 
+    static void setHandleFFprobeOutput(void (*func)(cstr));
+
     static cstr getErrorInfo();
     static cstr getStrDuration();
     static bool errorOccur();
+
+    static void (*m_addTextToFFOFile)(cstr);
 
 };
 

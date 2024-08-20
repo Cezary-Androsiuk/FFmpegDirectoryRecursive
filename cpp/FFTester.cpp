@@ -4,6 +4,7 @@ const int FFTester::Patterns::strtimeTextSize = 11;
 const str FFTester::Patterns::videoPrefix = "Video: ";
 const str FFTester::Patterns::patternH265 = "Video: hevc";
 const str FFTester::Patterns::patternH264 = "Video: h264";
+void (*FFTester::m_addTextToFFOFile)(cstr) = nullptr;
 
 FFTester::VerificationStatus FFTester::m_verificationStatus;
 str FFTester::m_errorInfo;
@@ -11,6 +12,9 @@ str FFTester::m_strDuration;
 
 void FFTester::handleOutput(cstr line)
 {
+    if(m_addTextToFFOFile != nullptr)
+        m_addTextToFFOFile(line);
+
     if(m_strDuration.empty())
     {
         size_t durationPrefixPos = line.find(FFTester::Patterns::durationPrefix);
@@ -53,6 +57,9 @@ bool FFTester::canBeConvertedToH265(cstr filePath)
     str command = "ffprobe -i \"" + filePath + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
 
+    if(m_addTextToFFOFile != nullptr)
+        m_addTextToFFOFile("\t\tcommand: " + command + "\n\n");
+
     FILE* pipe = pipeOpen(command.c_str(), "r");
     if (!pipe) {
         fprintf(stderr, "Cannot open the pipe!\n");
@@ -84,6 +91,11 @@ bool FFTester::canBeConvertedToH265(cstr filePath)
         printf("      FFTester found that video encoding is other than H265\n");
 
     return m_verificationStatus != VerificationStatus::IsH265;
+}
+
+void FFTester::setHandleFFprobeOutput(void (*func)(cstr))
+{
+    m_addTextToFFOFile = func;
 }
 
 cstr FFTester::getErrorInfo()

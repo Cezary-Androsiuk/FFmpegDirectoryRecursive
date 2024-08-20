@@ -219,6 +219,9 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
     printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
     printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
 
+    FFExecute::addTextToFFOFile("\n\t\tFFprobe output:\n");
+    FFTester::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
+
     if(!FFTester::canBeConvertedToH265(inFile))
     {
         if(FFTester::errorOccur())
@@ -258,9 +261,11 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
         return;
     }
 
-
     str command = "ffmpeg -i \"" + inFile + "\" -c:v libx265 -vtag hvc1 \"" + outFile + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
+
+    FFExecute::addTextToFFOFile("\n\n\n\n\n\n\t\tFFmpeg output:\n");
+    FFExecute::addTextToFFOFile("\t\tcommand: " + command + "\n\n");
 
     int duration = FFExecute::getInterpretationOfTime(FFTester::getStrDuration());
     m_strDuration = FFExecute::splitNumberByThousands(duration);
@@ -344,7 +349,10 @@ void FFExecute::runFFmpeg(cstr inFile, cstr outFile)
     ++ m_performedFFmpegs;
     
     printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
-    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]\n\n\n\n\n\n\n\n\n");
+    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
+    FFExecute::addTextToFFOFile("-------------------------------------------------------------------");
+    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
+    
     
     FFExecute::closeFFOFile();
 }
