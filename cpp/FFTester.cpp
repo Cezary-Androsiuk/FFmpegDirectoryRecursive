@@ -58,7 +58,7 @@ bool FFTester::canBeConvertedToH265(cstr filePath)
     command += " 2>&1"; // move stderr to stdout (connect them)
 
     if(m_addTextToFFOFile != nullptr)
-        m_addTextToFFOFile("\t\tcommand: " + command + "\n\n");
+        m_addTextToFFOFile("    command: " + command + "\n\n");
 
     FILE* pipe = pipeOpen(command.c_str(), "r");
     if (!pipe) {

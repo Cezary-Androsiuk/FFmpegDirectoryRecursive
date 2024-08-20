@@ -219,7 +219,7 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
     printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
     printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
 
-    FFExecute::addTextToFFOFile("\n\t\tFFprobe output:\n");
+    FFExecute::addTextToFFOFile("\n    FFprobe output:\n");
     FFTester::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
 
     if(!FFTester::canBeConvertedToH265(inFile))
@@ -264,8 +264,8 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
     str command = "ffmpeg -i \"" + inFile + "\" -c:v libx265 -vtag hvc1 \"" + outFile + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
 
-    FFExecute::addTextToFFOFile("\n\n\n\n\n\n\t\tFFmpeg output:\n");
-    FFExecute::addTextToFFOFile("\t\tcommand: " + command + "\n\n");
+    FFExecute::addTextToFFOFile("\n\n\n\n\n\n    FFmpeg output:\n");
+    FFExecute::addTextToFFOFile("    command: " + command + "\n\n");
 
     int duration = FFExecute::getInterpretationOfTime(FFTester::getStrDuration());
     m_strDuration = FFExecute::splitNumberByThousands(duration);
