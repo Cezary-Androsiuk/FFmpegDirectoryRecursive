@@ -69,8 +69,9 @@ str FFExecute::getCurrentTime()
 
     char buffer[16];
     sprintf(buffer, "%04d%02d%02d_%02d%02d%02d", 
-        time->tm_year, time->tm_mon, time->tm_mday,
+        time->tm_year+1900, time->tm_mon+1, time->tm_mday,
         time->tm_hour, time->tm_min, time->tm_sec);
+    
     return str(buffer);
 }
 
@@ -350,7 +351,7 @@ void FFExecute::runFFmpeg(cstr inFile, cstr outFile)
     
     printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
     FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
-    FFExecute::addTextToFFOFile("-------------------------------------------------------------------");
+    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
     FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
     
     
