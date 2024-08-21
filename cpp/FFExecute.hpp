@@ -14,7 +14,9 @@
 namespace fs = std::filesystem;
 
 typedef std::string str;
+typedef std::wstring wstr;
 typedef const std::string &cstr;
+typedef const std::wstring &cwstr;
 
 #define FFMPEG_OUTPUT_FILE(time) ("FFmpeg_output-" + time + ".txt") 
 
@@ -35,6 +37,7 @@ class FFExecute
 {
     static void handleOutput(cstr line);
     static void printOutputToCMD(cstr line);
+    static long long myStoll(cstr string) noexcept;
     static size_t getInterpretationOfTime(cstr strtime);
     static str getCurrentTime();
     static str changeOutputFileNameIfNeeded(cstr fileName);

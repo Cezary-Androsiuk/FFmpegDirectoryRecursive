@@ -26,11 +26,23 @@ void FFExecute::printOutputToCMD(cstr line)
     size_t timeTextPos = line.find(timeText);
     if(timeTextPos == str::npos)
         return;
-        
+
     str strtime = line.substr(timeTextPos + sizeof(timeText), strtimeTextSize);
     int timePassed = FFExecute::getInterpretationOfTime(strtime);
 
     FFExecute::printProgress(timePassed);
+}
+
+long long FFExecute::myStoll(cstr string) noexcept
+{
+    // std::stoll throws exception while argument is an empty string...
+    long long integer = 0;
+
+    try{
+        integer = std::stoll(string);
+    } catch(...) {}
+
+    return integer;
 }
 
 size_t FFExecute::getInterpretationOfTime(cstr strtime)
@@ -42,18 +54,19 @@ size_t FFExecute::getInterpretationOfTime(cstr strtime)
     std::stringstream ss(strtime);
     std::string segment;
     size_t hours = 0, minutes = 0, seconds = 0, milliseconds = 0;
-
-    std::getline(ss, segment, ':');
-    hours = std::stoll(segment);
     
     std::getline(ss, segment, ':');
-    minutes = std::stoll(segment);
+    hours = FFExecute::myStoll(segment);
+    
+    std::getline(ss, segment, ':');
+    minutes = FFExecute::myStoll(segment);
     
     std::getline(ss, segment, '.');
-    seconds = std::stoll(segment);
+    seconds = FFExecute::myStoll(segment);
+    
     std::getline(ss, segment);
-    milliseconds = std::stoll(segment);
-
+    milliseconds = FFExecute::myStoll(segment);
+    
     return (hours * 3600 * 1000) + 
         (minutes * 60 * 1000) + 
         (seconds * 1000) + 
@@ -156,8 +169,7 @@ str FFExecute::splitNumberByThousands(int number, char separator)
 void FFExecute::printProgress(int progress)
 {
     // create format __23/0123, or _123/0123
-    FFExecute::clearLine(15+2 + m_strDuration.size() * 2);
-
+    FFExecute::clearLine(15+2 + m_strDuration.size() * 2 + 4);
     str strProgress = FFExecute::splitNumberByThousands(progress);
     str space = str(m_strDuration.size() - strProgress.size(), ' ');
 

@@ -59,8 +59,10 @@ int main(int argc, const char **argv)
     printf("Selected directory: %s\n", directory.string().c_str());
     
     fs::path outDirectory( directory.string() + "-ffmpeg-h.265" );
-    // printf(COLOR_RED "DEBUG ONLY!" COLOR_RESET "\n");
-    // rm_all(outDirectory);
+
+    printf(COLOR_RED "DEBUG ONLY!" COLOR_RESET "\n");
+    rm_all(outDirectory);
+    
     if(!createOutputDirectory( outDirectory ))
     {
         fprintf(stderr, COLOR_RESET "Failed while creating output directory:" COLOR_RED " %s" COLOR_RESET, lastError.c_str());
@@ -94,11 +96,13 @@ int main(int argc, const char **argv)
     {
         // all files in list are valid at this point
         fs::path outFile = createOutputFilename(inFile, directory, outDirectory);
+        // printf("inFile string: %s\n", inFile.string().c_str());
+        // printf("outFile string: %ls\n", inFile.wstring().c_str());
         FFExecute::runFFmpeg(inFile.string(), outFile.string());
     }
 
 
-    // deleteDirectoryIfEmpty(outDirectory);
+    deleteDirectoryIfEmpty(outDirectory);
 
     printf("Finished all FFmpegs!\n");
 }
