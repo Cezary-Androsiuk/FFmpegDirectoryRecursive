@@ -14,9 +14,7 @@
 namespace fs = std::filesystem;
 
 typedef std::string str;
-typedef std::wstring wstr;
 typedef const std::string &cstr;
-typedef const std::wstring &cwstr;
 
 #define FFMPEG_OUTPUT_FILE(time) ("FFmpeg_output-" + time + ".txt") 
 

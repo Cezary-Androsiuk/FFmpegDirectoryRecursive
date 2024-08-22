@@ -92,13 +92,17 @@ int main(int argc, const char **argv)
 
     str filesProgress = FFExecute::makeFileProgressPostfix();
     printf("Status: [ %s ]\n\n", filesProgress.c_str()); 
-    for(const auto &inFile : listOfFiles)
+    for(const auto &inFilePath : listOfFiles)
     {
         // all files in list are valid at this point
-        fs::path outFile = createOutputFilename(inFile, directory, outDirectory);
-        // printf("inFile string: %s\n", inFile.string().c_str());
-        // printf("outFile string: %ls\n", inFile.wstring().c_str());
-        FFExecute::runFFmpeg(inFile.string(), outFile.string());
+        fs::path outFilePath = createOutputFilename(inFilePath, directory, outDirectory);
+
+        std::wstring inFileWString = inFilePath.wstring();
+        std::string inFileString(inFileWString.begin(), inFileWString.end());
+        std::wstring outFileWString = outFilePath.wstring();
+        std::string outFileString(outFileWString.begin(), outFileWString.end());
+
+        FFExecute::runFFmpeg(inFileString, outFileString);
     }
 
 
