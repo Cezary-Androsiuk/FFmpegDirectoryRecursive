@@ -21,6 +21,8 @@
 // in example path to this executable (for now) is "D:\vscode\c++\projects\FFmpegDirectoryRecursive"
 // now, you can open cmd in any directory and just in command prompt type "ffmpegRec . mkv+mp4"
 
+#define IN_DEBUG true
+
 int main(int argc, const char **argv)
 {
     printf("\n");
@@ -31,35 +33,33 @@ int main(int argc, const char **argv)
     void* arguments[] = {&directory, &extensions, &skipAction};
     if( !handleArgs(argc, argv, arguments) )
     {
-        // messages are handle in 'handle args function'
+        // messages are handle in 'handleArgs' function
         return 1;
     }
 
     printf("Selected directory: %s\n", directory.string().c_str());
     
-    fs::path outDirectory( directory.string() + "-ffmpeg-h.265" );
-
-    printf(COLOR_RED "DEBUG ONLY!" COLOR_RESET "\n");
-    rm_all(outDirectory);
-    
-    if(!createOutputDirectory( outDirectory ))
+    fs::path outDirectory = createOutputDirectory(directory, IN_DEBUG);
+    if(outDirectory == fs::path())
     {
-        fprintf(stderr, COLOR_RESET "Failed while creating output directory:" COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+        // messages are handle in 'createOutputDirectory' function
         return 1;
     }
 
-    if(!copyStructureOfFolders(directory, outDirectory))
+    fs::path OFCDirectory = createOCFDirectory(directory, IN_DEBUG);
+    if(OFCDirectory == fs::path())
     {
-        fprintf(stderr, COLOR_RESET "Failed while creating structure of folders in output directory:" COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+        // messages are handle in 'createOCFDirectory' function
         return 1;
     }
 
     printf("Found files:\n");
-    vpath listOfFiles = ListMaker::listOfFiles(directory, extensions); // listOfFiles prints
+    vpath listOfFiles = ListMaker::listOfFiles(directory, extensions); // listOfFiles prints them
 
     FFExecute::setTotalFFmpegsToPerform(listOfFiles.size());
     FFExecute::setSkipAction(skipAction);
     FFExecute::setffOFileDirectory(directory);
+    FFExecute::setOFCDirectory(OFCDirectory);
     
     str skippedText;
     if(skipAction == SkipAction::Skip) skippedText = "skipped";

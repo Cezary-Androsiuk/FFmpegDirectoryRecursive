@@ -217,7 +217,7 @@ bool isDirectoryEmpty(fs::path directory)
     return true;
 }
 
-bool createOutputDirectory(fs::path outDirectory)
+bool createDirectoryIfValid(fs::path outDirectory)
 {
     FUNC_START
 
@@ -294,6 +294,62 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
     printf("Structure of folders created\n");
 
     return true;
+}
+
+fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist)
+{
+    fs::path outDirectory( inputDirectory.string() + "-ffmpeg-h.265" );
+
+    if(removeDirIfExist)
+    {
+        printf(COLOR_RED "DEBUG ONLY!" COLOR_RESET "\n");
+        rm_all(outDirectory);
+    }
+    
+    if(!createDirectoryIfValid( outDirectory ))
+    {
+        fprintf(stderr, 
+            COLOR_RESET "Failed while creating output directory:" 
+            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+        return fs::path();
+    }
+
+    if(!copyStructureOfFolders(inputDirectory, outDirectory))
+    {
+        fprintf(stderr, 
+            COLOR_RESET "Failed while creating structure of folders in output directory:" 
+            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+        return fs::path();
+    }
+    return outDirectory;
+}
+
+fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFDirectory is OutputCompletedFilesDirectory
+{
+    fs::path OFCDirectory( inputDirectory.string() + "-compressed_old_files");
+
+    if(removeDirIfExist)
+    {
+        printf(COLOR_RED "DEBUG ONLY!" COLOR_RESET "\n");
+        rm_all(OFCDirectory);
+    }
+
+    if(!createDirectoryIfValid( OFCDirectory ))
+    {
+        fprintf(stderr, 
+            COLOR_RESET "Failed while creating output completed files directory:" 
+            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+        return fs::path();
+    }
+
+    if(!copyStructureOfFolders(inputDirectory, OFCDirectory))
+    {
+        fprintf(stderr, 
+            COLOR_RESET "Failed while creating structure of folders in output completed files directory:" 
+            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+        return fs::path();
+    }
+    return OFCDirectory;
 }
 
 fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory)

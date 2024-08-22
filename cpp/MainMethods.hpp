@@ -48,8 +48,12 @@ bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr
 bool argsValidFlexible(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction);
 
 bool isDirectoryEmpty(fs::path directory);
-bool createOutputDirectory(fs::path outDirectory);
+bool createDirectoryIfValid(fs::path outDirectory);
 bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir);
+
+fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist = false);
+fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist = false); // OCFDirectory is OutputCompletedFilesDirectory
+
 fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory);
 
 void deleteDirectoryIfEmpty(fs::path outDirectory);
