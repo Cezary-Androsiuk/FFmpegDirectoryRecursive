@@ -352,6 +352,23 @@ fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFD
     return OFCDirectory;
 }
 
+void printStatusInfo(SkipAction skipAction)
+{
+    str skippedText;
+    if(skipAction == SkipAction::Skip) skippedText = "skipped";
+    else if(skipAction == SkipAction::Copy) skippedText = "copied";
+    else if(skipAction == SkipAction::Move) skippedText = "moved";
+
+    printf("\n[ " COLOR_WHITE "correctlyPerformed / performed / totalToPerform   " 
+        COLOR_RESET COLOR_RED "failed" COLOR_RESET " / " COLOR_YELLOW "%s" COLOR_RESET " ]\n", skippedText.c_str());
+}
+
+str stringFromPath(fs::path path)
+{
+    std::wstring wstring(path.wstring());
+    return str(wstring.begin(), wstring.end());
+}
+
 fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory)
 {
     // replace extension to mp4 (works then i won't change it to filesystem way)

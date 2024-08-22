@@ -59,28 +59,18 @@ int main(int argc, const char **argv)
     FFExecute::setSkipAction(skipAction);
     FFExecute::setffOFileDirectory(directory);
     
-    str skippedText;
-    if(skipAction == SkipAction::Skip) skippedText = "skipped";
-    else if(skipAction == SkipAction::Copy) skippedText = "copied";
-    else if(skipAction == SkipAction::Move) skippedText = "moved";
-
-    printf("\n[ " COLOR_WHITE "correctlyPerformed / performed / totalToPerform   " 
-        COLOR_RESET COLOR_RED "failed" COLOR_RESET " / " COLOR_YELLOW "%s" COLOR_RESET " ]\n", skippedText.c_str());
-
+    printStatusInfo(skipAction);
     str filesProgress = FFExecute::makeFileProgressPostfix();
     printf("Status: [ %s ]\n\n", filesProgress.c_str()); 
-    for(const auto &inFilePath : listOfFiles)
+
+    for(const auto &inFile : listOfFiles)
     {
         // all files in list are valid at this point
-        fs::path outFilePath = createOutputFilename(inFilePath, directory, outDirectory);
+        fs::path outFile = createOutputFilename(inFile, directory, outDirectory);
+        fs::path OFCFile /* ... */;
         // TODO create OFCFilePath
 
-        std::wstring inFileWString = inFilePath.wstring();
-        std::string inFileString(inFileWString.begin(), inFileWString.end());
-        std::wstring outFileWString = outFilePath.wstring();
-        std::string outFileString(outFileWString.begin(), outFileWString.end());
-
-        FFExecute::runFFmpeg(inFileString, outFileString);
+        FFExecute::runFFmpeg(stringFromPath(inFile), stringFromPath(outFile)/*, stringFromPath(OFCFile)*/);
     }
 
 

@@ -35,8 +35,10 @@ extern const char possibleSeparators[];
 
 #define COLOR_RESET   "\033[0m"
 #define COLOR_RED     "\033[31m"
-#define COLOR_GREEN   "\033[32m"
 #define COLOR_WHITE   "\033[37m"
+#define COLOR_GREEN   "\033[32m"
+#define COLOR_YELLOW  "\033[33m"
+#define TEXT_BOLD     "\033[1m"
 
 
 vstr splitStringByChar(cstr str, char separator);
@@ -53,6 +55,9 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir);
 
 fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist = false);
 fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist = false); // OCFDirectory is OutputCompletedFilesDirectory
+
+void printStatusInfo(SkipAction skipAction);
+str stringFromPath(fs::path path);
 
 fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory);
 
