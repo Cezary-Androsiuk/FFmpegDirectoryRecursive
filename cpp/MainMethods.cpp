@@ -58,9 +58,9 @@ bool handleArgs(int argc, const char **argv, void *arguments[])
 {
     // very dangerous function... but, i kinda like this risk ;)
     
-    fs::path *directory = static_cast<fs::path *>(arguments[1]);
-    vstr *extensions = static_cast<vstr *>(arguments[2]);
-    SkipAction *skipAction = static_cast<SkipAction *>(arguments[3]);
+    fs::path *directory = static_cast<fs::path *>(arguments[0]);
+    vstr *extensions = static_cast<vstr *>(arguments[1]);
+    SkipAction *skipAction = static_cast<SkipAction *>(arguments[2]);
 
     bool exitValue;
 
@@ -93,7 +93,6 @@ bool handleArgs(int argc, const char **argv, void *arguments[])
 bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction)
 {
     FUNC_START
-    
     if(argc < 4)
     {
         lastError = "To few arguments!";
@@ -123,6 +122,7 @@ bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr
         return false;
     }
 
+    
     if(directory != nullptr)
         *directory = fs::absolute( givenDirectory );
 
@@ -326,7 +326,7 @@ fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist)
 
 fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFDirectory is OutputCompletedFilesDirectory
 {
-    fs::path OFCDirectory( inputDirectory.string() + "-compressed_old_files");
+    fs::path OFCDirectory( inputDirectory.string() + "-compressed_source_files");
 
     if(removeDirIfExist)
     {

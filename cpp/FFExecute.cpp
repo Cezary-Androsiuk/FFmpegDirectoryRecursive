@@ -10,7 +10,6 @@ SkipAction FFExecute::m_skipAction = SkipAction::Skip;
 std::ofstream FFExecute::m_ffOFile;
 str FFExecute::m_ffOFileName;
 fs::path FFExecute::m_ffOFileDirectory;
-fs::path FFExecute::m_OFCDirectory;
 str FFExecute::m_strDuration;
 
 void FFExecute::handleOutput(cstr line)
@@ -354,11 +353,6 @@ void FFExecute::setSkipAction(SkipAction skipAction)
 void FFExecute::setffOFileDirectory(fs::path directory)
 {
     m_ffOFileDirectory = directory;
-}
-
-void FFExecute::setOFCDirectory(fs::path directory)
-{
-    m_OFCDirectory = directory;
 }
 
 void FFExecute::runFFmpeg(cstr inFile, cstr outFile)

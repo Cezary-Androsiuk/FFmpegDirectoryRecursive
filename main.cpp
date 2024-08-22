@@ -38,7 +38,6 @@ int main(int argc, const char **argv)
     }
 
     printf("Selected directory: %s\n", directory.string().c_str());
-    
     fs::path outDirectory = createOutputDirectory(directory, IN_DEBUG);
     if(outDirectory == fs::path())
     {
@@ -59,7 +58,6 @@ int main(int argc, const char **argv)
     FFExecute::setTotalFFmpegsToPerform(listOfFiles.size());
     FFExecute::setSkipAction(skipAction);
     FFExecute::setffOFileDirectory(directory);
-    FFExecute::setOFCDirectory(OFCDirectory);
     
     str skippedText;
     if(skipAction == SkipAction::Skip) skippedText = "skipped";
@@ -75,6 +73,7 @@ int main(int argc, const char **argv)
     {
         // all files in list are valid at this point
         fs::path outFilePath = createOutputFilename(inFilePath, directory, outDirectory);
+        // TODO create OFCFilePath
 
         std::wstring inFileWString = inFilePath.wstring();
         std::string inFileString(inFileWString.begin(), inFileWString.end());

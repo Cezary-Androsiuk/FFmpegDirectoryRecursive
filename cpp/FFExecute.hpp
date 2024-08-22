@@ -61,7 +61,6 @@ public:
     static void setTotalFFmpegsToPerform(int count);
     static void setSkipAction(SkipAction skipAction);
     static void setffOFileDirectory(fs::path directory);
-    static void setOFCDirectory(fs::path directory);
     static void runFFmpeg(cstr inFile, cstr outFile);
 
 private:
@@ -75,7 +74,6 @@ private:
     static std::ofstream m_ffOFile; // ffOFile is FFmpegOutputFile
     static str m_ffOFileName; // ffOFile is FFmpegOutputFile
     static fs::path m_ffOFileDirectory;
-    static fs::path m_OFCDirectory;
     static str m_strDuration;
 };
 
