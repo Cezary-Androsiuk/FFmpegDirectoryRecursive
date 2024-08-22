@@ -232,6 +232,13 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
     printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
     printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
 
+    if(!fs::exists(inFile))
+    {
+        fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    Input file not exist!\n");
+        return;
+    }
+
     FFExecute::addTextToFFOFile("\n    FFprobe output:\n");
     FFTester::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
 
