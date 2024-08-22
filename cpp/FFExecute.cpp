@@ -335,7 +335,7 @@ str FFExecute::makeFileProgressPostfix(bool addColors)
 
     // correctly_performed_ffmpegs / performed_ffmpegs / total_ffmpegs_to_perform   failed_ffmpegs / skipped_ffmpegs
     if(addColors)
-        return COLOR_WHITE/*grey color*/ + cpFF + "/" + pFF + "/" + tFFtp + " " COLOR_RESET COLOR_RED + fFF + COLOR_RESET "/" COLOR_YELLOW + sFF + COLOR_RESET;
+        return COLOR_WHITE + cpFF + "/" + pFF + "/" + tFFtp + " " COLOR_RESET COLOR_RED + fFF + COLOR_RESET "/" COLOR_YELLOW + sFF + COLOR_RESET;
     else 
         return cpFF + "/" + pFF + "/" + tFFtp + " " + fFF + "/" + sFF;
 }

@@ -24,6 +24,9 @@ typedef std::vector<fs::path> vpath;
 extern str lastError;
 extern const char possibleSeparators[];
 
+
+#define FLEXIBLE_ARGUMENTS false
+
 #define FUNC_START {lastError = "";}
 
 #define DEFAULT_PATH fs::current_path()
@@ -40,7 +43,8 @@ vstr splitStringByChar(cstr str, char separator);
 vstr splitExtensionsInput(str input);
 void stringTolower(str &string);
 SkipAction handleInputSkipAction(str input);
-bool argsValid(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction);
+bool handleArgs(int argc, const char **argv, void *arguments[]);
+bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction);
 bool argsValidFlexible(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction);
 
 bool isDirectoryEmpty(fs::path directory);

@@ -21,8 +21,6 @@
 // in example path to this executable (for now) is "D:\vscode\c++\projects\FFmpegDirectoryRecursive"
 // now, you can open cmd in any directory and just in command prompt type "ffmpegRec . mkv+mp4"
 
-#define FLEXIBLE_ARGUMENTS false
-
 int main(int argc, const char **argv)
 {
     printf("\n");
@@ -30,31 +28,12 @@ int main(int argc, const char **argv)
     fs::path directory;
     vstr extensions;
     SkipAction skipAction;
-#if FLEXIBLE_ARGUMENTS
-    if(!argsValidFlexible(argc, argv, &directory, &extensions, &skipAction))
+    void* arguments[] = {&directory, &extensions, &skipAction};
+    if( !handleArgs(argc, argv, arguments) )
     {
-        fprintf(stderr, COLOR_RESET "Arguments are not valid:" COLOR_RED " %s\n" COLOR_RESET, lastError.c_str());
-        fprintf(stderr, "Expected none, one, two or three arguments!\n");
-        printf("ffmpegRec :1 :2 :3\n");
-        printf("  :1 - path to execute ffmpeg in it\n");
-        printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
-        printf("  :3 - action when file is already H265 [skip/copy/move]\n");
-
+        // messages are handle in 'handle args function'
         return 1;
     }
-#else
-    if(!argsValid(argc, argv, &directory, &extensions, &skipAction))
-    {
-        fprintf(stderr, COLOR_RESET "Arguments are not valid:" COLOR_RED " %s\n" COLOR_RESET, lastError.c_str());
-        fprintf(stderr, "Expected three arguments!\n");
-        printf("ffmpegRec :1 :2 :3\n");
-        printf("  :1 - path to execute ffmpeg in it\n");
-        printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
-        printf("  :3 - action when file is already H265 [skip/copy/move]\n");
-
-        return 1;
-    }
-#endif
 
     printf("Selected directory: %s\n", directory.string().c_str());
     
@@ -87,7 +66,7 @@ int main(int argc, const char **argv)
     else if(skipAction == SkipAction::Copy) skippedText = "copied";
     else if(skipAction == SkipAction::Move) skippedText = "moved";
 
-    printf("\n[ " COLOR_WHITE/*grey color*/ "correctlyPerformed / performed / totalToPerform   " 
+    printf("\n[ " COLOR_WHITE "correctlyPerformed / performed / totalToPerform   " 
         COLOR_RESET COLOR_RED "failed" COLOR_RESET " / " COLOR_YELLOW "%s" COLOR_RESET " ]\n", skippedText.c_str());
 
     str filesProgress = FFExecute::makeFileProgressPostfix();

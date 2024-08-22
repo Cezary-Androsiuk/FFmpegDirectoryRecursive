@@ -54,7 +54,43 @@ SkipAction handleInputSkipAction(str input)
     return SkipAction::None;
 }
 
-bool argsValid(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction)
+bool handleArgs(int argc, const char **argv, void *arguments[])
+{
+    // very dangerous function... but, i kinda like this risk ;)
+    
+    fs::path *directory = static_cast<fs::path *>(arguments[1]);
+    vstr *extensions = static_cast<vstr *>(arguments[2]);
+    SkipAction *skipAction = static_cast<SkipAction *>(arguments[3]);
+
+    bool exitValue;
+
+#if FLEXIBLE_ARGUMENTS
+    exitValue = argsValidFlexible(argc, argv, directory, extensions, skipAction);
+    if(!exitValue)
+    {
+        fprintf(stderr, COLOR_RESET "Arguments are not valid:" COLOR_RED " %s\n" COLOR_RESET, lastError.c_str());
+        fprintf(stderr, "Expected none, one, two or three arguments!\n");
+        printf("ffmpegRec :1 :2 :3\n");
+        printf("  :1 - path to execute ffmpeg in it\n");
+        printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
+        printf("  :3 - action when file is already H265 [skip/copy/move]\n");
+    }
+#else
+    exitValue = argsValidConst(argc, argv, directory, extensions, skipAction);
+    if(!exitValue)
+    {
+        fprintf(stderr, COLOR_RESET "Arguments are not valid:" COLOR_RED " %s\n" COLOR_RESET, lastError.c_str());
+        fprintf(stderr, "Expected three arguments!\n");
+        printf("ffmpegRec :1 :2 :3\n");
+        printf("  :1 - path to execute ffmpeg in it\n");
+        printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
+        printf("  :3 - action when file is already H265 [skip/copy/move]\n");
+    }
+#endif
+    return exitValue;
+}
+
+bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction)
 {
     FUNC_START
     
