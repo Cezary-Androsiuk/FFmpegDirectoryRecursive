@@ -22,7 +22,7 @@
 // in example path to this executable (for now) is "D:\vscode\c++\projects\FFmpegDirectoryRecursive"
 // now, you can open cmd in any directory and just in command prompt type "ffmpegRec . mkv+mp4"
 
-#define IN_DEBUG true
+#define IN_DEBUG false
 
 int main(int argc, const char **argv)
 {
@@ -69,13 +69,12 @@ int main(int argc, const char **argv)
         // all files in list are valid at this point
         fs::path outFile = createOutputFile(inFile, directory, outDirectory);
         fs::path OFCFile = createOFCFile(inFile, directory, OFCDirectory);
-        // TODO create OFCFilePath
 
         FFExecute::runFFmpeg(stringFromPath(inFile), stringFromPath(outFile), stringFromPath(OFCFile));
     }
 
-
     deleteDirectoryIfEmpty(outDirectory);
+    deleteDirectoryIfEmpty(OFCDirectory);
 
     printf("Finished all FFmpegs!\n");
 
