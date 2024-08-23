@@ -9,6 +9,7 @@
 #include <filesystem>
 
 #include "FFTester.hpp"
+#include "OtherError.hpp"
 #include "enums/SkipAction.hpp"
 
 namespace fs = std::filesystem;
@@ -54,14 +55,18 @@ class FFExecute
     static bool copyFileAction(cstr from, cstr to);
     static bool moveFileAction(cstr from, cstr to);
 
-    static void _runFFmpeg(cstr inFile, str outFile);
+    static void moveCorrectlyFinishedFile(cstr from, cstr to);
+
+    static void handleAlreadyH265File(cstr inFile, str outFile);
+    
+    static void _runFFmpeg(cstr inFile, str outFile, cstr moveFile);
 
 public:
     static str makeFileProgressPostfix(bool addColors = true);
     static void setTotalFFmpegsToPerform(int count);
     static void setSkipAction(SkipAction skipAction);
     static void setffOFileDirectory(fs::path directory);
-    static void runFFmpeg(cstr inFile, cstr outFile);
+    static void runFFmpeg(cstr inFile, cstr outFile, cstr moveFile);
 
 private:
     static int m_performedFFmpegs;

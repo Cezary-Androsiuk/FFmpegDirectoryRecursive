@@ -5,6 +5,8 @@ enum SkipAction{
     Skip,
     Move,
     Copy,
+    // Test,
+    // Force,
     None // not selected, 
 };
 

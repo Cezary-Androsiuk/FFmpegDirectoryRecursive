@@ -3,6 +3,7 @@
 #include <vector>
 #include <filesystem>
 
+#include "cpp/OtherError.hpp"
 #include "cpp/MainMethods.hpp"
 #include "cpp/FFExecute.hpp"
 #include "cpp/ListMaker.hpp"
@@ -11,7 +12,7 @@
 // locate files recursive
 
 // compile:
-// g++ main.cpp cpp\MainMethods.cpp cpp\FFExecute.cpp cpp\FFTester.cpp cpp\ListMaker.cpp -o ffmpegRec.exe
+// g++ main.cpp cpp\MainMethods.cpp cpp\FFExecute.cpp cpp\FFTester.cpp cpp\ListMaker.cpp cpp\OtherError.cpp -o ffmpegRec.exe
 
 // instalation(add ffmpegRec.exe to PATH environment):
 // 1 in windows search type "Edit the system environment variables" 
@@ -66,15 +67,17 @@ int main(int argc, const char **argv)
     for(const auto &inFile : listOfFiles)
     {
         // all files in list are valid at this point
-        fs::path outFile = createOutputFilename(inFile, directory, outDirectory);
-        fs::path OFCFile /* ... */;
+        fs::path outFile = createOutputFile(inFile, directory, outDirectory);
+        fs::path OFCFile = createOFCFile(inFile, directory, OFCDirectory);
         // TODO create OFCFilePath
 
-        FFExecute::runFFmpeg(stringFromPath(inFile), stringFromPath(outFile)/*, stringFromPath(OFCFile)*/);
+        FFExecute::runFFmpeg(stringFromPath(inFile), stringFromPath(outFile), stringFromPath(OFCFile));
     }
 
 
     deleteDirectoryIfEmpty(outDirectory);
 
     printf("Finished all FFmpegs!\n");
+
+    OtherError::printErrors();
 }

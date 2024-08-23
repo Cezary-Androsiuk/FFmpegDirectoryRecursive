@@ -19,4 +19,4 @@ public:
     static cvstr getErrors();
 };
 
-#endif OTHER_ERROR_HPP
+#endif // OTHER_ERROR_HPP

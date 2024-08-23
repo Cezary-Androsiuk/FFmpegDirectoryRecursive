@@ -369,7 +369,7 @@ str stringFromPath(fs::path path)
     return str(wstring.begin(), wstring.end());
 }
 
-fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory)
+fs::path createOutputFile(cpath inFile, cpath directory, cpath outDirectory)
 {
     // replace extension to mp4 (works then i won't change it to filesystem way)
     str newFilename = inFile.filename().string();
@@ -393,6 +393,27 @@ fs::path createOutputFilename(cpath inFile, cpath directory, cpath outDirectory)
             changedInFile.erase(0,1);
     }
     return outDirectory / changedInFile;
+}
+
+fs::path createOFCFile(cpath inFile, cpath directory, cpath OFCDirectory)
+{
+    str inFileStr = stringFromPath(inFile);
+
+    // change to output directory
+    size_t startPos = inFileStr.find(directory.string());
+    if(startPos == str::npos)
+    {
+        printf(COLOR_RED "WTF!\n'%s' SHOULD EXIST IN '%s'\n" COLOR_RESET, directory.string().c_str(), inFileStr.c_str());
+        printf("EXIT FROM %s\n", __PRETTY_FUNCTION__);
+        exit(1);
+    }
+    inFileStr.erase(startPos, directory.string().size());
+    if(!inFileStr.empty())
+    {
+        if(inFileStr[0] == '\\' || inFileStr[0] == '/')
+            inFileStr.erase(0,1);
+    }
+    return OFCDirectory / inFileStr;
 }
 
 void deleteDirectoryIfEmpty(fs::path outDirectory)

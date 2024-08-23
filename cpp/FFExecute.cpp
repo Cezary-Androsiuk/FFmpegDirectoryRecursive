@@ -221,7 +221,72 @@ bool FFExecute::moveFileAction(cstr from, cstr to)
     }
 }
 
-void FFExecute::_runFFmpeg(cstr inFile, str outFile)
+void FFExecute::moveCorrectlyFinishedFile(cstr from, cstr to)
+{
+    try
+    {
+        fs::rename(fs::path(from), fs::path(to));
+    }
+    catch(std::filesystem::filesystem_error &e)
+    {
+        fprintf(stderr, "    Moving finished file " COLOR_RED "failed" COLOR_RESET ": %s\n", e.what());
+        FFExecute::addTextToFFOFile("    Moving finished file failed: " + str( e.what() ));
+        OtherError::addError("Moving finished file from: '" + from + "', to: '" + to + "' failed", __PRETTY_FUNCTION__);
+    }
+}
+
+void FFExecute::handleAlreadyH265File(cstr inFile, str outFile)
+{
+    if(FFTester::errorOccur())
+    {
+        fprintf(stderr, "    error occur while checking if file is H265: %s\n", 
+            FFTester::getErrorInfo().c_str());
+        FFExecute::addTextToFFOFile("    error occur while checking if file is H265: " + 
+            FFTester::getErrorInfo() + "\n");
+        ++ m_failedFFmpegs;
+        return;
+    }
+    // in file is already H265 format!
+
+    // possible actins here:
+    // 1: skip inFile as it is
+    // 2: copy inFile to outFile    
+    // 3: move inFile to outFile  
+
+    switch (m_skipAction)
+    {
+    case SkipAction::Skip:
+        FFExecute::skipFileAction();
+        ++ m_skippedFFmpegs;
+        break;
+        
+    case SkipAction::Copy:
+        if(FFExecute::copyFileAction(inFile, outFile))
+        { // file copied
+            ++ m_skippedFFmpegs;
+        }
+        else // copying file failed
+        {
+            ++ m_failedFFmpegs;
+        }
+        break;
+        
+    case SkipAction::Move:
+        if(FFExecute::moveFileAction(inFile, outFile))
+        { // file moved
+            ++ m_skippedFFmpegs;
+        }
+        else // moving file failed
+        {
+            ++ m_failedFFmpegs;
+        }
+        break;
+    }
+
+    return;
+}
+
+void FFExecute::_runFFmpeg(cstr inFile, str outFile, cstr moveFile)
 {
     printf("  Starting new FFmpeg\n");
     FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
@@ -236,6 +301,7 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
     {
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
         FFExecute::addTextToFFOFile("    Input file not exist!\n");
+        ++ m_failedFFmpegs;
         return;
     }
 
@@ -244,40 +310,7 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
 
     if(!FFTester::canBeConvertedToH265(inFile))
     {
-        if(FFTester::errorOccur())
-        {
-            fprintf(stderr, "    error occur while checking if file is H265: %s\n", 
-                FFTester::getErrorInfo().c_str());
-            FFExecute::addTextToFFOFile("    error occur while checking if file is H265: " + 
-                FFTester::getErrorInfo() + "\n");
-            ++ m_failedFFmpegs;
-            return;
-        }
-        // in file is already H265 format!
-
-        // possible actins here:
-        // 1: skip inFile as it is
-        // 2: copy inFile to outFile    
-        // 3: move inFile to outFile  
-
-        switch (m_skipAction)
-        {
-        case SkipAction::Skip:
-            FFExecute::skipFileAction();
-            break;
-            
-        case SkipAction::Copy:
-            if(!FFExecute::copyFileAction(inFile, outFile))
-                return;
-            break;
-            
-        case SkipAction::Move:
-            if(!FFExecute::moveFileAction(inFile, outFile))
-                return;
-            break;
-        }
-
-        ++ m_skippedFFmpegs;
+        FFExecute::handleAlreadyH265File(inFile, outFile);
         return;
     }
 
@@ -322,6 +355,9 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile)
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
         FFExecute::addTextToFFOFile("    FFmpeg finished!\n");
+
+        // move finished files to directory, that contains finished files
+        FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
     }
 }
 
@@ -362,10 +398,10 @@ void FFExecute::setffOFileDirectory(fs::path directory)
     m_ffOFileDirectory = directory;
 }
 
-void FFExecute::runFFmpeg(cstr inFile, cstr outFile)
+void FFExecute::runFFmpeg(cstr inFile, cstr outFile, cstr moveFile)
 {
     FFExecute::openFFOFile();
-    FFExecute::_runFFmpeg(inFile, outFile);
+    FFExecute::_runFFmpeg(inFile, outFile, moveFile);
     ++ m_performedFFmpegs;
     
     printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
