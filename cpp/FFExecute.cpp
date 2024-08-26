@@ -237,15 +237,6 @@ void FFExecute::moveCorrectlyFinishedFile(cstr from, cstr to)
 
 void FFExecute::handleAlreadyH265File(cstr inFile, str outFile)
 {
-    if(FFTester::errorOccur())
-    {
-        fprintf(stderr, "    error occur while checking if file is H265: %s\n", 
-            FFTester::getErrorInfo().c_str());
-        FFExecute::addTextToFFOFile("    error occur while checking if file is H265: " + 
-            FFTester::getErrorInfo() + "\n");
-        ++ m_failedFFmpegs;
-        return;
-    }
     // in file is already H265 format!
 
     // possible actins here:
@@ -286,10 +277,146 @@ void FFExecute::handleAlreadyH265File(cstr inFile, str outFile)
     return;
 }
 
-void FFExecute::_runFFmpeg(cstr inFile, str outFile, cstr moveFile)
+void FFExecute::runFFmpegTest(cstr inFile, cstr outFile, cstr moveFile)
 {
-    printf("  Starting new FFmpeg\n");
-    FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
+    FFExecute::openFFOFile();
+
+    FFExecute::runFFmpegTest2(inFile, outFile, moveFile);
+    ++ m_performedFFmpegs;
+    FFExecute::clearLine(70 /* 66 could be occupied */); // max is 1 mln of ffmpegs to perform (to clear line)
+    printf("    Statuts: [ %s ]", FFExecute::makeFileProgressPostfix().c_str());
+    if(m_performedFFmpegs == m_totalFFmpegsToPerform)
+        printf("\n\n");
+    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
+    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
+    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
+    
+    FFExecute::closeFFOFile();
+}
+
+void FFExecute::runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile)
+{
+    FFExecute::openFFOFile();
+
+    FFExecute::runFFmpegForce2(inFile, outFile, moveFile);
+    ++ m_performedFFmpegs;
+    
+    printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
+    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
+    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
+    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
+    
+    FFExecute::closeFFOFile();
+}
+
+void FFExecute::runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile)
+{
+    FFExecute::openFFOFile();
+
+    FFExecute::runFFmpegStandard2(inFile, outFile, moveFile);
+    ++ m_performedFFmpegs;
+    
+    printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
+    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
+    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
+    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
+    
+    FFExecute::closeFFOFile();
+}
+
+void FFExecute::runFFmpegTest2(cstr inFile, str outFile, cstr moveFile)
+{
+    FFExecute::addTextToFFOFile("\n    FFprobe output:\n");
+    FFTester::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
+
+    if(!FFTester::canBeConvertedToH265(inFile, false))
+    {
+        if(FFTester::errorOccur())
+        {
+            fprintf(stderr, "    error occur while checking if file is H265: %s\n", 
+                FFTester::getErrorInfo().c_str());
+            FFExecute::addTextToFFOFile("    error occur while checking if file is H265: " + 
+                FFTester::getErrorInfo() + "\n");
+            ++ m_failedFFmpegs;
+            return;
+        }
+
+        ++ m_skippedFFmpegs;
+        return;
+    }
+}
+
+void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
+{
+    printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
+
+    // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
+    outFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
+
+    printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
+    printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
+
+    if(!fs::exists(inFile))
+    {
+        fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    Input file not exist!\n");
+        ++ m_failedFFmpegs;
+        return;
+    }
+
+    FFExecute::addTextToFFOFile("\n    FFprobe output:\n");
+    FFTester::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
+
+    str command = "ffmpeg -i \"" + inFile + "\" -c:v libx265 -vtag hvc1 \"" + outFile + "\"";
+    command += " 2>&1"; // move stderr to stdout (connect them)
+
+    FFExecute::addTextToFFOFile("\n\n\n\n\n\n    FFmpeg output:\n");
+    FFExecute::addTextToFFOFile("    command: " + command + "\n\n");
+
+    int duration = FFExecute::getInterpretationOfTime(FFTester::getStrDuration());
+    m_strDuration = FFExecute::splitNumberByThousands(duration);
+    FFExecute::printProgress(0);
+
+
+    
+    FILE* pipe = pipeOpen(command.c_str(), "r");
+    if (!pipe) {
+        fprintf(stderr, "    " COLOR_RED "Cannot open the pipe" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    Cannot open the pipe!\n");
+        return;
+    }
+
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
+        FFExecute::handleOutput(str(buffer));
+
+    int ffmpegExitCode = pipeClose(pipe);
+
+
+    
+    if(ffmpegExitCode) // not equal 0 - error occur in ffmpeg
+    {
+        ++ m_failedFFmpegs;
+        printf("\n");
+        fprintf(stderr, "    FFmpeg " COLOR_RESET COLOR_RED "failed" COLOR_RESET " with code %d!\n", ffmpegExitCode);
+        FFExecute::addTextToFFOFile("    FFmpeg failed with code " + std::to_string(ffmpegExitCode) + "!\n");
+    }
+    else // no error - ffmpeg finished correctly
+    {
+        ++ m_correctlyPerformedFFmpegs;
+        FFExecute::printProgress(duration);
+        printf("\n");
+        fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    FFmpeg finished!\n");
+
+        // move finished files to directory, that contains finished files
+        FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
+    }
+}
+
+void FFExecute::runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile)
+{
+    printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
 
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
     outFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
@@ -310,6 +437,16 @@ void FFExecute::_runFFmpeg(cstr inFile, str outFile, cstr moveFile)
 
     if(!FFTester::canBeConvertedToH265(inFile))
     {
+        if(FFTester::errorOccur())
+        {
+            fprintf(stderr, "    error occur while checking if file is H265: %s\n", 
+                FFTester::getErrorInfo().c_str());
+            FFExecute::addTextToFFOFile("    error occur while checking if file is H265: " + 
+                FFTester::getErrorInfo() + "\n");
+            ++ m_failedFFmpegs;
+            return;
+        }
+
         FFExecute::handleAlreadyH265File(inFile, outFile);
         return;
     }
@@ -400,15 +537,10 @@ void FFExecute::setffOFileDirectory(fs::path directory)
 
 void FFExecute::runFFmpeg(cstr inFile, cstr outFile, cstr moveFile)
 {
-    FFExecute::openFFOFile();
-    FFExecute::_runFFmpeg(inFile, outFile, moveFile);
-    ++ m_performedFFmpegs;
-    
-    printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
-    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
-    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
-    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
-    
-    
-    FFExecute::closeFFOFile();
+    if(m_skipAction == SkipAction::Test)
+        FFExecute::runFFmpegTest(inFile, outFile, moveFile);
+    else if(m_skipAction == SkipAction::Force)
+        FFExecute::runFFmpegForce(inFile, outFile, moveFile);
+    else
+        FFExecute::runFFmpegStandard(inFile, outFile, moveFile);
 }

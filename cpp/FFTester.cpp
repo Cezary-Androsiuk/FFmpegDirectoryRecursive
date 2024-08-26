@@ -48,7 +48,7 @@ void FFTester::handleOutput(cstr line)
     }
 }
 
-bool FFTester::canBeConvertedToH265(cstr filePath)
+bool FFTester::canBeConvertedToH265(cstr filePath, bool verbose)
 {
     m_errorInfo.clear();
     m_strDuration.clear();
@@ -82,13 +82,16 @@ bool FFTester::canBeConvertedToH265(cstr filePath)
         fprintf(stderr, "      FFprobe " COLOR_RED "failed" COLOR_RESET " with code %d!\n", ffprobeExitCode);
         return false;
     }
-
-    if(m_verificationStatus == VerificationStatus::IsH265)
-        printf("      FFTester found that video encoding is H265\n");
-    else if(m_verificationStatus == VerificationStatus::IsH265)
-        printf("      FFTester found that video encoding is H264\n");
-    else if(m_verificationStatus == VerificationStatus::IsOther)
-        printf("      FFTester found that video encoding is other than H265\n");
+    
+    if(verbose)
+    {
+        if(m_verificationStatus == VerificationStatus::IsH265)
+            printf("      FFTester found that video encoding is H265\n");
+        else if(m_verificationStatus == VerificationStatus::IsH265)
+            printf("      FFTester found that video encoding is H264\n");
+        else if(m_verificationStatus == VerificationStatus::IsOther)
+            printf("      FFTester found that video encoding is other than H265\n");
+    }
 
     return m_verificationStatus != VerificationStatus::IsH265;
 }

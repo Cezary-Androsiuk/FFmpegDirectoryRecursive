@@ -59,7 +59,13 @@ class FFExecute
 
     static void handleAlreadyH265File(cstr inFile, str outFile);
     
-    static void _runFFmpeg(cstr inFile, str outFile, cstr moveFile);
+    static void runFFmpegTest(cstr inFile, cstr outFile, cstr moveFile);
+    static void runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile);
+    static void runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile);
+    
+    static void runFFmpegTest2(cstr inFile, str outFile, cstr moveFile);
+    static void runFFmpegForce2(cstr inFile, str outFile, cstr moveFile);
+    static void runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile);
 
 public:
     static str makeFileProgressPostfix(bool addColors = true);

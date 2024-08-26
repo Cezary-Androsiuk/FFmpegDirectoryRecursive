@@ -49,6 +49,8 @@ SkipAction handleInputSkipAction(str input)
     if(input == "skip") return SkipAction::Skip;
     else if(input == "move") return SkipAction::Move;
     else if(input == "copy") return SkipAction::Copy;
+    else if(input == "test") return SkipAction::Test;
+    else if(input == "force") return SkipAction::Force;
 
     // fprintf(stderr, "Unrecognized '%s', available options are skip/move/copy\n");
     return SkipAction::None;
@@ -73,7 +75,7 @@ bool handleArgs(int argc, const char **argv, void *arguments[])
         printf("ffmpegRec :1 :2 :3\n");
         printf("  :1 - path to execute ffmpeg in it\n");
         printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
-        printf("  :3 - action when file is already H265 [skip/copy/move]\n");
+        printf("  :3 - action when file is already H265 [skip/copy/move/test/force]\n");
     }
 #else
     exitValue = argsValidConst(argc, argv, directory, extensions, skipAction);
@@ -84,7 +86,7 @@ bool handleArgs(int argc, const char **argv, void *arguments[])
         printf("ffmpegRec :1 :2 :3\n");
         printf("  :1 - path to execute ffmpeg in it\n");
         printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
-        printf("  :3 - action when file is already H265 [skip/copy/move]\n");
+        printf("  :3 - action when file is already H265 [skip/copy/move/test/force]\n");
     }
 #endif
     return exitValue;
@@ -355,9 +357,15 @@ fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFD
 void printStatusInfo(SkipAction skipAction)
 {
     str skippedText;
+    
+    // printf("\n[ " COLOR_WHITE "correctlyPerformed / performed / totalToPerform   " 
+    //     COLOR_RESET COLOR_RED "failed" COLOR_RESET);
+
     if(skipAction == SkipAction::Skip) skippedText = "skipped";
     else if(skipAction == SkipAction::Copy) skippedText = "copied";
     else if(skipAction == SkipAction::Move) skippedText = "moved";
+    else if(skipAction == SkipAction::Test) skippedText = "already H265";
+    else if(skipAction == SkipAction::Force) skippedText = "force?";
 
     printf("\n[ " COLOR_WHITE "correctlyPerformed / performed / totalToPerform   " 
         COLOR_RESET COLOR_RED "failed" COLOR_RESET " / " COLOR_YELLOW "%s" COLOR_RESET " ]\n", skippedText.c_str());
