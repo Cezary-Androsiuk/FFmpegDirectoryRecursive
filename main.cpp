@@ -74,6 +74,7 @@ int main(int argc, const char **argv)
         fs::path OFCFile = createOFCFile(inFile, directory, OFCDirectory);
 
         FFExecute::runFFmpeg(stringFromPath(inFile), stringFromPath(outFile), stringFromPath(OFCFile));
+        
     }
 
     deleteDirectoryIfEmpty(outDirectory);

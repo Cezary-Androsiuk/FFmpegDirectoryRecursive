@@ -294,11 +294,11 @@ void FFExecute::runFFmpegTest(cstr inFile)
 {
     FFExecute::openFFOFile();
 
-    printf("Statuts: %s", FFExecute::makeFileProgressPostfix().c_str());
+    printf("Status: %s", FFExecute::makeFileProgressPostfix().c_str());
     FFExecute::runFFmpegTest2(inFile);
     ++ m_performedFFmpegs;
     if(m_performedFFmpegs == m_totalFFmpegsToPerform)
-        printf("Statuts: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
+        printf("\nStatus: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
 
     FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
     FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
@@ -314,7 +314,7 @@ void FFExecute::runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile)
     FFExecute::runFFmpegForce2(inFile, outFile, moveFile);
     ++ m_performedFFmpegs;
     
-    printf("    Statuts: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
+    printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
     FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
     FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
     FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
@@ -329,7 +329,7 @@ void FFExecute::runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile)
     FFExecute::runFFmpegStandard2(inFile, outFile, moveFile);
     ++ m_performedFFmpegs;
     
-    printf("    Statuts: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
+    printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
     FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
     FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
     FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
@@ -463,6 +463,9 @@ void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
 
         // move finished files to directory, that contains finished files
         FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
+        
+        // !==============================================================================================================================================================
+        // change create/update date of compressed file
     }
 }
 
@@ -558,6 +561,9 @@ void FFExecute::runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile)
 
         // move finished files to directory, that contains finished files
         FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
+
+        // !==============================================================================================================================================================
+        // change create/update date of compressed file
     }
 }
 
