@@ -29,7 +29,6 @@ void FFExecute::printOutputToCMD(cstr line)
 
     str strtime = line.substr(timeTextPos + sizeof(timeText), strtimeTextSize);
     int timePassed = FFExecute::getInterpretationOfTime(strtime);
-
     FFExecute::printProgress(timePassed);
 }
 
@@ -139,6 +138,21 @@ int FFExecute::lengthOfNumber(int number)
     return std::to_string(number).size();
 }
 
+str FFExecute::numberThatOccupiesGivenSpace(int number, int space)
+{
+    str strNumber = FFExecute::splitNumberByThousands(number);
+    int occupiedSpace = strNumber.size();
+    int additionalSpace = space - occupiedSpace;
+    if(additionalSpace > 0)
+    {
+        return str(additionalSpace, ' ') + strNumber;
+    }
+    else 
+    {
+        return strNumber;
+    }
+}
+
 void FFExecute::clearLine(int len)
 {
     // clear line (windows os only)
@@ -168,12 +182,11 @@ str FFExecute::splitNumberByThousands(int number, char separator)
 
 void FFExecute::printProgress(int progress)
 {
-    // create format __23/0123, or _123/0123
+    // create format __23/0123, or _123/0123 ...
     FFExecute::clearLine(15+2 + m_strDuration.size() * 2 + 4);
-    str strProgress = FFExecute::splitNumberByThousands(progress);
-    str space = str(m_strDuration.size() - strProgress.size(), ' ');
+    str strProgress = FFExecute::numberThatOccupiesGivenSpace(progress, m_strDuration.size());
+    printf("    progress:  %s / %s", strProgress.c_str(), m_strDuration.c_str());
 
-    printf("    progress:  %s%s / %s", space.c_str(), strProgress.c_str(), m_strDuration.c_str());
     fflush(stdout);
 }
 
@@ -277,17 +290,17 @@ void FFExecute::handleAlreadyH265File(cstr inFile, str outFile)
     return;
 }
 
-void FFExecute::runFFmpegTest(cstr inFile, cstr outFile, cstr moveFile)
+void FFExecute::runFFmpegTest(cstr inFile)
 {
     FFExecute::openFFOFile();
 
-    FFExecute::runFFmpegTest2(inFile, outFile, moveFile);
+    printf("Statuts: %s", FFExecute::makeFileProgressPostfix().c_str());
+    FFExecute::runFFmpegTest2(inFile);
     ++ m_performedFFmpegs;
-    FFExecute::clearLine(70 /* 66 could be occupied */); // max is 1 mln of ffmpegs to perform (to clear line)
-    printf("    Statuts: [ %s ]", FFExecute::makeFileProgressPostfix().c_str());
     if(m_performedFFmpegs == m_totalFFmpegsToPerform)
-        printf("\n\n");
-    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
+        printf("Statuts: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
+
+    FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
     FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
     FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
     
@@ -301,8 +314,8 @@ void FFExecute::runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile)
     FFExecute::runFFmpegForce2(inFile, outFile, moveFile);
     ++ m_performedFFmpegs;
     
-    printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
-    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
+    printf("    Statuts: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
+    FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
     FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
     FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
     
@@ -316,16 +329,29 @@ void FFExecute::runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile)
     FFExecute::runFFmpegStandard2(inFile, outFile, moveFile);
     ++ m_performedFFmpegs;
     
-    printf("    Statuts: [ %s ]\n\n", FFExecute::makeFileProgressPostfix().c_str());
-    FFExecute::addTextToFFOFile("    Status [ " + FFExecute::makeFileProgressPostfix(false) + " ]");
+    printf("    Statuts: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
+    FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
     FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
     FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
     
     FFExecute::closeFFOFile();
 }
 
-void FFExecute::runFFmpegTest2(cstr inFile, str outFile, cstr moveFile)
+void FFExecute::runFFmpegTest2(cstr inFile)
 {
+    printf("  in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
+    
+    FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
+    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
+    // seprate case when input file not exist
+    if(!fs::exists(inFile))
+    {
+        fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    Input file not exist!\n");
+        ++ m_failedFFmpegs;
+        return;
+    }
+
     FFExecute::addTextToFFOFile("\n    FFprobe output:\n");
     FFTester::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
 
@@ -344,6 +370,7 @@ void FFExecute::runFFmpegTest2(cstr inFile, str outFile, cstr moveFile)
         ++ m_skippedFFmpegs;
         return;
     }
+    ++ m_correctlyPerformedFFmpegs;
 }
 
 void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
@@ -356,6 +383,7 @@ void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
     printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
     printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
 
+    // seprate case when input file not exist
     if(!fs::exists(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
@@ -367,10 +395,24 @@ void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
     FFExecute::addTextToFFOFile("\n    FFprobe output:\n");
     FFTester::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
 
+    // FFTester will set "strDuration" so there is no way to get rid of it
+    if(!FFTester::canBeConvertedToH265(inFile))
+    {
+        if(FFTester::errorOccur())
+        {
+            fprintf(stderr, "    error occur while executing FFTester: %s\n", 
+                FFTester::getErrorInfo().c_str());
+            FFExecute::addTextToFFOFile("    error occur while executing FFTester: " + 
+                FFTester::getErrorInfo() + "\n");
+            ++ m_failedFFmpegs;
+            return;
+        }
+    }
+
     str command = "ffmpeg -i \"" + inFile + "\" -c:v libx265 -vtag hvc1 \"" + outFile + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
 
-    FFExecute::addTextToFFOFile("\n\n\n\n\n\n    FFmpeg output:\n");
+    FFExecute::addTextToFFOFile("\n    FFmpeg output:\n");
     FFExecute::addTextToFFOFile("    command: " + command + "\n\n");
 
     int duration = FFExecute::getInterpretationOfTime(FFTester::getStrDuration());
@@ -388,7 +430,17 @@ void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
 
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
-        FFExecute::handleOutput(str(buffer));
+    {
+        try
+        {
+            FFExecute::handleOutput(str(buffer));
+        }
+        catch(const std::exception& e)
+        {
+            printf("error while handling output\n");
+        }
+        
+    }
 
     int ffmpegExitCode = pipeClose(pipe);
 
@@ -420,10 +472,11 @@ void FFExecute::runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile)
 
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
     outFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
-
+    
     printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
     printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
 
+    // seprate case when input file not exist
     if(!fs::exists(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
@@ -472,7 +525,17 @@ void FFExecute::runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile)
 
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
-        FFExecute::handleOutput(str(buffer));
+    {
+        try
+        {
+            FFExecute::handleOutput(str(buffer));
+        }
+        catch(const std::exception& e)
+        {
+            printf("error while handling output\n");
+        }
+        
+    }
 
     int ffmpegExitCode = pipeClose(pipe);
 
@@ -502,22 +565,38 @@ str FFExecute::makeFileProgressPostfix(bool addColors)
 {
     // total_ffmpegs_to_perform should be the largest number
     int lengthOfCount = FFExecute::lengthOfNumber(m_totalFFmpegsToPerform);
-    str cpFFSpace = str(lengthOfCount - FFExecute::lengthOfNumber(m_correctlyPerformedFFmpegs), ' ');
-    str pFFSpace = str(lengthOfCount - FFExecute::lengthOfNumber(m_performedFFmpegs), ' ');
-    str tFFtpSpace = str(lengthOfCount - FFExecute::lengthOfNumber(m_totalFFmpegsToPerform), ' ');
-    str fFFSpace = str(lengthOfCount - FFExecute::lengthOfNumber(m_failedFFmpegs), ' ');
-    str sFFSpace = str(lengthOfCount - FFExecute::lengthOfNumber(m_skippedFFmpegs), ' ');
-    str cpFF = cpFFSpace + std::to_string(m_correctlyPerformedFFmpegs);
-    str pFF = pFFSpace +  std::to_string(m_performedFFmpegs);
-    str tFFtp = tFFtpSpace +  std::to_string(m_totalFFmpegsToPerform);
-    str fFF = fFFSpace +  std::to_string(m_failedFFmpegs);
-    str sFF = sFFSpace +  std::to_string(m_skippedFFmpegs);
+    str output = "[ ";
 
-    // correctly_performed_ffmpegs / performed_ffmpegs / total_ffmpegs_to_perform   failed_ffmpegs / skipped_ffmpegs
-    if(addColors)
-        return COLOR_WHITE + cpFF + "/" + pFF + "/" + tFFtp + " " COLOR_RESET COLOR_RED + fFF + COLOR_RESET "/" COLOR_YELLOW + sFF + COLOR_RESET;
-    else 
-        return cpFF + "/" + pFF + "/" + tFFtp + " " + fFF + "/" + sFF;
+    output += addColors ? COLOR_WHITE : "";
+    output += FFExecute::numberThatOccupiesGivenSpace( m_correctlyPerformedFFmpegs, lengthOfCount );
+    output += addColors ? COLOR_RESET : "";
+    output += "/";
+    
+    output += addColors ? COLOR_WHITE : "";
+    output += FFExecute::numberThatOccupiesGivenSpace( m_performedFFmpegs, lengthOfCount );
+    output += addColors ? COLOR_RESET : "";
+    output += "/";
+    
+    output += addColors ? COLOR_WHITE : "";
+    output += FFExecute::numberThatOccupiesGivenSpace( m_totalFFmpegsToPerform, lengthOfCount );
+    output += addColors ? COLOR_RESET : "";
+    output += " ";
+    
+    output += addColors ? COLOR_RED : "";
+    output += FFExecute::numberThatOccupiesGivenSpace( m_failedFFmpegs, lengthOfCount );
+    output += addColors ? COLOR_RESET : "";
+    
+    if(m_skipAction != SkipAction::Force)
+    {
+        output += "/";
+        output += addColors ? COLOR_YELLOW : "";
+        output += FFExecute::numberThatOccupiesGivenSpace( m_skippedFFmpegs, lengthOfCount );
+        output += addColors ? COLOR_RESET : "";
+    }
+
+    output += " ]";
+
+    return output;
 }
 
 void FFExecute::setTotalFFmpegsToPerform(int count)
@@ -538,7 +617,7 @@ void FFExecute::setffOFileDirectory(fs::path directory)
 void FFExecute::runFFmpeg(cstr inFile, cstr outFile, cstr moveFile)
 {
     if(m_skipAction == SkipAction::Test)
-        FFExecute::runFFmpegTest(inFile, outFile, moveFile);
+        FFExecute::runFFmpegTest(inFile);
     else if(m_skipAction == SkipAction::Force)
         FFExecute::runFFmpegForce(inFile, outFile, moveFile);
     else

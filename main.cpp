@@ -19,8 +19,8 @@
 // 2 press "Environment Variables..." button
 // 3 in bottom part (System variables) find variable named "Path" and double click on it
 // 4 press on the right site the "New" button and type path to directory, where executable file (created after compilation) is located
-// in example path to this executable (for now) is "D:\vscode\c++\projects\FFmpegDirectoryRecursive"
-// now, you can open cmd in any directory and just in command prompt type "ffmpegRec . mkv+mp4"
+// in example path to this executable (for now) is "D:\vscode\c++\projects\FFmpegDirectoryRecursive(github)"
+// now, you can open cmd in any directory and just in command prompt type "ffmpegRec . mkv+mp4 move"
 
 #define IN_DEBUG false
 
@@ -61,8 +61,11 @@ int main(int argc, const char **argv)
     FFExecute::setffOFileDirectory(directory);
     
     printStatusInfo(skipAction);
-    str filesProgress = FFExecute::makeFileProgressPostfix();
-    printf("Status: [ %s ]\n\n", filesProgress.c_str()); 
+    if(skipAction != SkipAction::Test)
+    {
+        str filesProgress = FFExecute::makeFileProgressPostfix();
+        printf("Status: %s\n\n", filesProgress.c_str()); 
+    }
 
     for(const auto &inFile : listOfFiles)
     {

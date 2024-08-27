@@ -46,6 +46,7 @@ class FFExecute
     static void closeFFOFile(); // FFOFile is FFmpegOutputFile
 
     static int lengthOfNumber(int number);
+    static str numberThatOccupiesGivenSpace(int number, int space);
 
     static void clearLine(int len);
     static str splitNumberByThousands(int number, char separator = ' ');
@@ -59,11 +60,11 @@ class FFExecute
 
     static void handleAlreadyH265File(cstr inFile, str outFile);
     
-    static void runFFmpegTest(cstr inFile, cstr outFile, cstr moveFile);
+    static void runFFmpegTest(cstr inFile);
     static void runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile);
     static void runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile);
     
-    static void runFFmpegTest2(cstr inFile, str outFile, cstr moveFile);
+    static void runFFmpegTest2(cstr inFile);
     static void runFFmpegForce2(cstr inFile, str outFile, cstr moveFile);
     static void runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile);
 

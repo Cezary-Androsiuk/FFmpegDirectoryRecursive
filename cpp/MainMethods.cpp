@@ -328,7 +328,7 @@ fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist)
 
 fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFDirectory is OutputCompletedFilesDirectory
 {
-    fs::path OFCDirectory( inputDirectory.string() + "-compressed_source_files");
+    fs::path OFCDirectory( inputDirectory.string() + "-finished_source_files");
 
     if(removeDirIfExist)
     {
@@ -356,19 +356,35 @@ fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFD
 
 void printStatusInfo(SkipAction skipAction)
 {
-    str skippedText;
+    str output = "\n[ ";
+
+    if(skipAction == SkipAction::Test)
+        output += COLOR_WHITE "couldBePerformed" COLOR_RESET;
+    else
+        output += COLOR_WHITE "correctlyPerformed" COLOR_RESET;
+
+    output += " / ";
+    output += COLOR_WHITE "performed" COLOR_RESET;
+    output += " / ";
+    output += COLOR_WHITE "totalToPerform" COLOR_RESET;
+    output += "   ";
+    output += COLOR_RED "failed" COLOR_RESET;
     
-    // printf("\n[ " COLOR_WHITE "correctlyPerformed / performed / totalToPerform   " 
-    //     COLOR_RESET COLOR_RED "failed" COLOR_RESET);
+    if(skipAction != SkipAction::Force)
+        output += " / ";
 
-    if(skipAction == SkipAction::Skip) skippedText = "skipped";
-    else if(skipAction == SkipAction::Copy) skippedText = "copied";
-    else if(skipAction == SkipAction::Move) skippedText = "moved";
-    else if(skipAction == SkipAction::Test) skippedText = "already H265";
-    else if(skipAction == SkipAction::Force) skippedText = "force?";
+    if(skipAction == SkipAction::Skip)
+        output += COLOR_YELLOW "skipped" COLOR_RESET;
+    else if(skipAction == SkipAction::Copy) 
+        output += COLOR_YELLOW "copied" COLOR_RESET;
+    else if(skipAction == SkipAction::Move) 
+        output += COLOR_YELLOW "moved" COLOR_RESET;
+    else if(skipAction == SkipAction::Test) 
+        output += COLOR_YELLOW "already H265" COLOR_RESET;
 
-    printf("\n[ " COLOR_WHITE "correctlyPerformed / performed / totalToPerform   " 
-        COLOR_RESET COLOR_RED "failed" COLOR_RESET " / " COLOR_YELLOW "%s" COLOR_RESET " ]\n", skippedText.c_str());
+    output += " ]\n";
+
+    printf("%s\n", output.c_str());
 }
 
 str stringFromPath(fs::path path)
