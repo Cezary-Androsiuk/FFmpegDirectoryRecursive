@@ -10,6 +10,7 @@
 
 #include "FFTester.hpp"
 #include "OtherError.hpp"
+#include "ChangeFileDate.hpp"
 #include "enums/SkipAction.hpp"
 
 namespace fs = std::filesystem;
@@ -56,9 +57,11 @@ class FFExecute
     static bool copyFileAction(cstr from, cstr to);
     static bool moveFileAction(cstr from, cstr to);
 
+    static void moveDateOfFile(cstr from, cstr to);
     static void moveCorrectlyFinishedFile(cstr from, cstr to);
 
     static void handleAlreadyH265File(cstr inFile, str outFile);
+    static str makeStringPathExistForCMD(cstr path);
     
     static void runFFmpegTest(cstr inFile);
     static void runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile);

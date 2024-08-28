@@ -214,6 +214,7 @@ bool FFExecute::copyFileAction(cstr from, cstr to)
         return false;
     }
 }
+
 bool FFExecute::moveFileAction(cstr from, cstr to)
 {
     fprintf(stderr, "    inFile is already H265! " COLOR_YELLOW "Moving" COLOR_RESET "!\n");
@@ -231,6 +232,18 @@ bool FFExecute::moveFileAction(cstr from, cstr to)
         FFExecute::addTextToFFOFile("    Moving file failed: " + str( e.what() ));
         ++ m_failedFFmpegs;
         return false;
+    }
+}
+
+void FFExecute::moveDateOfFile(cstr from, cstr to)
+{
+    ChangeFileDate::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
+
+    if(!ChangeFileDate::fromFileToFile(from, to))
+    {
+        fprintf(stderr, "    Changing date of the file " COLOR_RED "failed" COLOR_RESET );
+        FFExecute::addTextToFFOFile("    Changing date of the file failed");
+        OtherError::addError("    Changing date of the file failed", __PRETTY_FUNCTION__);
     }
 }
 
@@ -288,6 +301,13 @@ void FFExecute::handleAlreadyH265File(cstr inFile, str outFile)
     }
 
     return;
+}
+
+str FFExecute::makeStringPathExistForCMD(cstr path)
+{
+    fs::path p(path);
+    std::wstring ws(p.wstring());
+    return str(ws.begin(), ws.end());
 }
 
 void FFExecute::runFFmpegTest(cstr inFile)
@@ -409,7 +429,8 @@ void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
         }
     }
 
-    str command = "ffmpeg -i \"" + inFile + "\" -c:v libx265 -vtag hvc1 \"" + outFile + "\"";
+    str command = "ffmpeg -i \"" + FFExecute::makeStringPathExistForCMD(inFile) + 
+        "\" -c:v libx265 -vtag hvc1 \"" + FFExecute::makeStringPathExistForCMD(outFile) + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
 
     FFExecute::addTextToFFOFile("\n    FFmpeg output:\n");
@@ -461,11 +482,11 @@ void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
         FFExecute::addTextToFFOFile("    FFmpeg finished!\n");
 
+        // change create/update date of compressed file
+        FFExecute::moveDateOfFile(inFile, outFile);
+        
         // move finished files to directory, that contains finished files
         FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
-        
-        // !==============================================================================================================================================================
-        // change create/update date of compressed file
     }
 }
 
@@ -507,7 +528,8 @@ void FFExecute::runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile)
         return;
     }
 
-    str command = "ffmpeg -i \"" + inFile + "\" -c:v libx265 -vtag hvc1 \"" + outFile + "\"";
+    str command = "ffmpeg -i \"" + FFExecute::makeStringPathExistForCMD(inFile) + 
+        "\" -c:v libx265 -vtag hvc1 \"" + FFExecute::makeStringPathExistForCMD(outFile) + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
 
     FFExecute::addTextToFFOFile("\n\n\n\n\n\n    FFmpeg output:\n");
@@ -559,11 +581,11 @@ void FFExecute::runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile)
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
         FFExecute::addTextToFFOFile("    FFmpeg finished!\n");
 
+        // change create/update date of compressed file
+        FFExecute::moveDateOfFile(inFile, outFile);
+
         // move finished files to directory, that contains finished files
         FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
-
-        // !==============================================================================================================================================================
-        // change create/update date of compressed file
     }
 }
 
@@ -622,10 +644,16 @@ void FFExecute::setffOFileDirectory(fs::path directory)
 
 void FFExecute::runFFmpeg(cstr inFile, cstr outFile, cstr moveFile)
 {
-    if(m_skipAction == SkipAction::Test)
-        FFExecute::runFFmpegTest(inFile);
-    else if(m_skipAction == SkipAction::Force)
-        FFExecute::runFFmpegForce(inFile, outFile, moveFile);
-    else
-        FFExecute::runFFmpegStandard(inFile, outFile, moveFile);
+    try{
+        if(m_skipAction == SkipAction::Test)
+            FFExecute::runFFmpegTest(inFile);
+        else if(m_skipAction == SkipAction::Force)
+            FFExecute::runFFmpegForce(inFile, outFile, moveFile);
+        else
+            FFExecute::runFFmpegStandard(inFile, outFile, moveFile);
+    }
+    catch(std::exception &e)
+    {
+        fprintf(stderr, COLOR_RED "SOMETHING TERRIBLY WRONG ! %s" COLOR_RESET "\n", e.what());
+    }
 }
