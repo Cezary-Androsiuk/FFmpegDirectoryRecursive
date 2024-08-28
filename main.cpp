@@ -28,25 +28,25 @@ int main(int argc, const char **argv)
 {
     printf("\n");
 
-    fs::path directory;
+    fs::path inDirectory;
     vstr extensions;
     SkipAction skipAction;
-    void* arguments[] = {&directory, &extensions, &skipAction};
+    void* arguments[] = {&inDirectory, &extensions, &skipAction};
     if( !handleArgs(argc, argv, arguments) )
     {
         // messages are handle in 'handleArgs' function
         return 1;
     }
 
-    printf("Selected directory: %s\n", directory.string().c_str());
-    fs::path outDirectory = createOutputDirectory(directory, IN_DEBUG);
+    printf("Selected directory: %s\n", inDirectory.string().c_str());
+    fs::path outDirectory = createOutputDirectory(inDirectory, IN_DEBUG);
     if(outDirectory == fs::path())
     {
         // messages are handle in 'createOutputDirectory' function
         return 1;
     }
 
-    fs::path OFCDirectory = createOCFDirectory(directory, IN_DEBUG);
+    fs::path OFCDirectory = createOCFDirectory(inDirectory, IN_DEBUG);
     if(OFCDirectory == fs::path())
     {
         // messages are handle in 'createOCFDirectory' function
@@ -54,11 +54,11 @@ int main(int argc, const char **argv)
     }
 
     printf("Found files:\n");
-    vpath listOfFiles = ListMaker::listOfFiles(directory, extensions); // listOfFiles prints them
+    vpath listOfFiles = ListMaker::listOfFiles(inDirectory, extensions); // listOfFiles prints them
 
     FFExecute::setTotalFFmpegsToPerform(listOfFiles.size());
     FFExecute::setSkipAction(skipAction);
-    FFExecute::setffOFileDirectory(directory);
+    FFExecute::setffOFileDirectory(inDirectory);
     
     printStatusInfo(skipAction);
     if(skipAction != SkipAction::Test)
@@ -69,9 +69,9 @@ int main(int argc, const char **argv)
     for(const auto &inFile : listOfFiles)
     {
         // all files in list are valid at this point
-        fs::path outFile = createOutputFile(inFile, outDirectory);
-        fs::path OFCFile = createOFCFile(inFile, OFCDirectory);
-
+        fs::path outFile = createOutputFile(inFile, inDirectory, outDirectory);
+        fs::path OFCFile = createOFCFile(inFile, inDirectory, OFCDirectory);
+        
         FFExecute::runFFmpeg(inFile.string(), outFile.string(), OFCFile.string());
 
     }

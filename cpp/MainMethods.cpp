@@ -387,21 +387,19 @@ void printStatusInfo(SkipAction skipAction)
     printf("%s\n", output.c_str());
 }
 
-fs::path createOutputFile(cpath inFile, cpath outDirectory)
+fs::path createOutputFile(cpath inFile, cpath inDirectory, cpath outDirectory)
 {
-    // replace extension to mp4 (works then i won't change it to filesystem way)
-    str newFilename = inFile.filename().string();
-    size_t dotPos = newFilename.find_last_of('.');
-    // if file name not contains any dot => no extension also
-    newFilename = dotPos == str::npos ? newFilename : newFilename.substr(0, dotPos);
-    return outDirectory / (newFilename + ".mp4");
+    fs::path inFileWithMP4(inFile);
+    inFileWithMP4.replace_extension(L"mp4");
+    fs::path relativeInFileWithMP4 = fs::relative(inFileWithMP4, inDirectory);
+    return outDirectory / relativeInFileWithMP4;
+    // I underestimated the possibilities of filesystem lib
 }
 
-fs::path createOFCFile(cpath inFile, cpath OFCDirectory)
+fs::path createOFCFile(cpath inFile, cpath inDirectory, cpath OFCDirectory)
 {
-    std::wstring inFileName = inFile.filename().wstring();
-    
-    return OFCDirectory / inFileName;
+    fs::path relativeInFile = fs::relative(inFile, inDirectory);
+    return OFCDirectory / relativeInFile;
 }
 
 void deleteDirectoryIfEmpty(fs::path outDirectory)

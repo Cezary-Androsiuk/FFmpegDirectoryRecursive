@@ -15,7 +15,9 @@
 
 namespace fs = std::filesystem;
 typedef std::string str;
-typedef const std::string &cstr;
+typedef std::wstring wstr;
+typedef const str &cstr;
+typedef const wstr &cwstr;
 typedef std::vector<str> vstr;
 typedef const fs::path &cpath;
 typedef std::vector<fs::path> vpath;
@@ -58,8 +60,8 @@ fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist = false)
 
 void printStatusInfo(SkipAction skipAction);
 
-fs::path createOutputFile(cpath inFile, cpath outDirectory);
-fs::path createOFCFile(cpath inFile, cpath OFCDirectory);
+fs::path createOutputFile(cpath inFile, cpath inDirectory, cpath outDirectory);
+fs::path createOFCFile(cpath inFile, cpath inDirectory, cpath OFCDirectory);
 
 void deleteDirectoryIfEmpty(fs::path outDirectory);
 bool rm_all(const fs::path& path);
