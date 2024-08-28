@@ -3,9 +3,12 @@
 
 #include <cstdio>
 #include <string>
+#include <filesystem>
 // #include <sstream> // for getInterpretationOfTime
 // #include <ctime>
 // #include <fstream>
+
+namespace fs = std::filesystem;
 
 typedef std::string str;
 typedef const std::string &cstr;
@@ -31,6 +34,7 @@ class FFTester
     };
 
     static void handleOutput(cstr line);
+    static str makeStringPathExistForCMD(cstr path);
 
     enum VerificationStatus{
         InVerification = 0,

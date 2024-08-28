@@ -387,57 +387,21 @@ void printStatusInfo(SkipAction skipAction)
     printf("%s\n", output.c_str());
 }
 
-str stringFromPath(fs::path path)
-{
-    std::wstring wstring(path.wstring());
-    return str(wstring.begin(), wstring.end());
-}
-
-fs::path createOutputFile(cpath inFile, cpath directory, cpath outDirectory)
+fs::path createOutputFile(cpath inFile, cpath outDirectory)
 {
     // replace extension to mp4 (works then i won't change it to filesystem way)
     str newFilename = inFile.filename().string();
     size_t dotPos = newFilename.find_last_of('.');
     // if file name not contains any dot => no extension also
     newFilename = dotPos == str::npos ? newFilename : newFilename.substr(0, dotPos);
-    str changedInFile = (inFile.parent_path() / (newFilename + ".mp4")).string();
-
-    // change to output directory
-    size_t startPos = changedInFile.find(directory.string());
-    if(startPos == str::npos)
-    {
-        printf(COLOR_RED "WTF!\n'%s' SHOULD EXIST IN '%s'\n" COLOR_RESET, directory.string().c_str(), changedInFile.c_str());
-        printf("EXIT FROM %s\n", __PRETTY_FUNCTION__);
-        exit(1);
-    }
-    changedInFile.erase(startPos, directory.string().size());
-    if(!changedInFile.empty())
-    {
-        if(changedInFile[0] == '\\' || changedInFile[0] == '/')
-            changedInFile.erase(0,1);
-    }
-    return outDirectory / changedInFile;
+    return outDirectory / (newFilename + ".mp4");
 }
 
-fs::path createOFCFile(cpath inFile, cpath directory, cpath OFCDirectory)
+fs::path createOFCFile(cpath inFile, cpath OFCDirectory)
 {
-    str inFileStr = stringFromPath(inFile);
-
-    // change to output directory
-    size_t startPos = inFileStr.find(directory.string());
-    if(startPos == str::npos)
-    {
-        printf(COLOR_RED "WTF!\n'%s' SHOULD EXIST IN '%s'\n" COLOR_RESET, directory.string().c_str(), inFileStr.c_str());
-        printf("EXIT FROM %s\n", __PRETTY_FUNCTION__);
-        exit(1);
-    }
-    inFileStr.erase(startPos, directory.string().size());
-    if(!inFileStr.empty())
-    {
-        if(inFileStr[0] == '\\' || inFileStr[0] == '/')
-            inFileStr.erase(0,1);
-    }
-    return OFCDirectory / inFileStr;
+    std::wstring inFileName = inFile.filename().wstring();
+    
+    return OFCDirectory / inFileName;
 }
 
 void deleteDirectoryIfEmpty(fs::path outDirectory)

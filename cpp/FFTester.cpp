@@ -48,13 +48,20 @@ void FFTester::handleOutput(cstr line)
     }
 }
 
+str FFTester::makeStringPathExistForCMD(cstr path)
+{
+    fs::path p(path);
+    std::wstring ws(p.wstring());
+    return str(ws.begin(), ws.end());
+}
+
 bool FFTester::canBeConvertedToH265(cstr filePath, bool verbose)
 {
     m_errorInfo.clear();
     m_strDuration.clear();
     m_verificationStatus = VerificationStatus::InVerification;
 
-    str command = "ffprobe -i \"" + filePath + "\"";
+    str command = "ffprobe -i \"" + FFTester::makeStringPathExistForCMD(filePath) + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
 
     if(m_addTextToFFOFile != nullptr)

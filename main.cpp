@@ -66,15 +66,14 @@ int main(int argc, const char **argv)
         str filesProgress = FFExecute::makeFileProgressPostfix();
         printf("Status: %s\n\n", filesProgress.c_str()); 
     }
-
     for(const auto &inFile : listOfFiles)
     {
         // all files in list are valid at this point
-        fs::path outFile = createOutputFile(inFile, directory, outDirectory);
-        fs::path OFCFile = createOFCFile(inFile, directory, OFCDirectory);
+        fs::path outFile = createOutputFile(inFile, outDirectory);
+        fs::path OFCFile = createOFCFile(inFile, OFCDirectory);
 
-        FFExecute::runFFmpeg(stringFromPath(inFile), stringFromPath(outFile), stringFromPath(OFCFile));
-        
+        FFExecute::runFFmpeg(inFile.string(), outFile.string(), OFCFile.string());
+
     }
 
     deleteDirectoryIfEmpty(outDirectory);

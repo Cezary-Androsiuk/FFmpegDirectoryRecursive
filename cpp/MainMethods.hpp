@@ -57,10 +57,9 @@ fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist = fal
 fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist = false); // OCFDirectory is OutputCompletedFilesDirectory
 
 void printStatusInfo(SkipAction skipAction);
-str stringFromPath(fs::path path);
 
-fs::path createOutputFile(cpath inFile, cpath directory, cpath outDirectory);
-fs::path createOFCFile(cpath inFile, cpath directory, cpath OFCDirectory);
+fs::path createOutputFile(cpath inFile, cpath outDirectory);
+fs::path createOFCFile(cpath inFile, cpath OFCDirectory);
 
 void deleteDirectoryIfEmpty(fs::path outDirectory);
 bool rm_all(const fs::path& path);
