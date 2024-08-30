@@ -17,6 +17,7 @@ namespace fs = std::filesystem;
 
 typedef std::string str;
 typedef const std::string &cstr;
+typedef const fs::path &cpath;
 
 #define FFMPEG_OUTPUT_FILE(time) ("FFmpeg_output-" + time + ".txt") 
 
@@ -40,7 +41,7 @@ class FFExecute
     static long long myStoll(cstr string) noexcept;
     static size_t getInterpretationOfTime(cstr strtime);
     static str getCurrentTime();
-    static str changeOutputFileNameIfNeeded(cstr fileName);
+    static fs::path changeOutputFileNameIfNeeded(fs::path path);
 
     static void openFFOFile(); // FFOFile is FFmpegOutputFile
     static void addTextToFFOFile(cstr ffmpegOutput); // FFOFile is FFmpegOutputFile
@@ -54,29 +55,29 @@ class FFExecute
     static void printProgress(int progress);
 
     static void skipFileAction();
-    static bool copyFileAction(cstr from, cstr to);
-    static bool moveFileAction(cstr from, cstr to);
+    static bool copyFileAction(cpath from, cpath to);
+    static bool moveFileAction(cpath from, cpath to);
 
-    static void moveDateOfFile(cstr from, cstr to);
-    static void moveCorrectlyFinishedFile(cstr from, cstr to);
+    static void moveDateOfFile(cpath from, cpath to);
+    static void moveCorrectlyFinishedFile(cpath from, cpath to);
 
-    static void handleAlreadyH265File(cstr inFile, str outFile);
-    static str makeStringPathExistForCMD(cstr path);
+    static void handleAlreadyH265File(cpath inFile, cpath outFile);
+    static str makeStringPathExistForCMD(cpath path);
     
-    static void runFFmpegTest(cstr inFile);
-    static void runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile);
-    static void runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile);
+    static void runFFmpegTest(cpath inFile);
+    static void runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile);
+    static void runFFmpegStandard(cpath inFile, cpath outFile, cpath moveFile);
     
-    static void runFFmpegTest2(cstr inFile);
-    static void runFFmpegForce2(cstr inFile, str outFile, cstr moveFile);
-    static void runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile);
+    static void runFFmpegTest2(cpath inFile);
+    static void runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile);
+    static void runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile);
 
 public:
     static str makeFileProgressPostfix(bool addColors = true);
     static void setTotalFFmpegsToPerform(int count);
     static void setSkipAction(SkipAction skipAction);
     static void setffOFileDirectory(fs::path directory);
-    static void runFFmpeg(cstr inFile, cstr outFile, cstr moveFile);
+    static void runFFmpeg(cpath inFile, cpath outFile, cpath moveFile);
 
 private:
     static int m_performedFFmpegs;

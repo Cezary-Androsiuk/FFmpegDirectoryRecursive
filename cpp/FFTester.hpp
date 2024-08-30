@@ -12,6 +12,7 @@ namespace fs = std::filesystem;
 
 typedef std::string str;
 typedef const std::string &cstr;
+typedef const fs::path &cpath;
 
 #define COLOR_RESET   "\033[0m"
 #define COLOR_RED     "\033[31m"
@@ -34,7 +35,7 @@ class FFTester
     };
 
     static void handleOutput(cstr line);
-    static str makeStringPathExistForCMD(cstr path);
+    static str makeStringPathExistForCMD(cpath path);
 
     enum VerificationStatus{
         InVerification = 0,
@@ -48,7 +49,7 @@ class FFTester
     static str m_strDuration;
 
 public:
-    static bool canBeConvertedToH265(cstr filePath, bool verbose = true); // returns true if file is h265
+    static bool canBeConvertedToH265(cpath filePath, bool verbose = true); // returns true if file is h265
 
     static void setHandleFFprobeOutput(void (*func)(cstr));
 

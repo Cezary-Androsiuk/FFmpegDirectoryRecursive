@@ -48,14 +48,13 @@ void FFTester::handleOutput(cstr line)
     }
 }
 
-str FFTester::makeStringPathExistForCMD(cstr path)
+str FFTester::makeStringPathExistForCMD(cpath path)
 {
-    fs::path p(path);
-    std::wstring ws(p.wstring());
+    std::wstring ws(path.wstring());
     return str(ws.begin(), ws.end());
 }
 
-bool FFTester::canBeConvertedToH265(cstr filePath, bool verbose)
+bool FFTester::canBeConvertedToH265(cpath filePath, bool verbose)
 {
     m_errorInfo.clear();
     m_strDuration.clear();

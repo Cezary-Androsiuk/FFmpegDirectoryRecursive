@@ -79,7 +79,7 @@ str FFExecute::getCurrentTime()
     time(&rawTime);
     tm *time = localtime(&rawTime);
 
-    char buffer[16];
+    char buffer[32];
     sprintf(buffer, "%04d%02d%02d_%02d%02d%02d", 
         time->tm_year+1900, time->tm_mon+1, time->tm_mday,
         time->tm_hour, time->tm_min, time->tm_sec);
@@ -87,22 +87,27 @@ str FFExecute::getCurrentTime()
     return str(buffer);
 }
 
-str FFExecute::changeOutputFileNameIfNeeded(cstr file)
+fs::path FFExecute::changeOutputFileNameIfNeeded(fs::path path)
 {
-    fs::path parentPath = fs::path(file).parent_path();
-    str filename = fs::path(file).filename().string();
-    int dotPos = filename.find_last_of('.');
-    str rawFilename = filename.substr(0, dotPos);
-    str rawExtension = filename.substr(dotPos+1);
+    const fs::path parentPath = path.parent_path();
+    const std::wstring stem = path.stem().wstring();
+    const std::wstring extension = path.extension().wstring();
 
-    fs::path newFileName = parentPath / (rawFilename + "." + rawExtension);
-    int index = 0;  
-    while(fs::exists(newFileName))
+    int index = 0;
+    while(fs::exists(path))
     {
-        printf("      out file with filename '%s' " COLOR_YELLOW "already exist" COLOR_RESET "!\n", newFileName.filename().string().c_str());
-        newFileName = parentPath / (rawFilename + "_" + std::to_string(index++) + "." + rawExtension);
+        printf("      out file with filename '%ls' " COLOR_YELLOW "already exist" COLOR_RESET "!\n", path.filename().wstring().c_str());
+        FFExecute::addTextToFFOFile("out file with filename '" + path.filename().string() + "' already exist!\n");
+
+        wchar_t indexText[32];
+        swprintf(indexText, L"_%06d", index++);
+        
+        path = parentPath / (stem + std::wstring(indexText) +  extension);
     }
-    return newFileName.string();
+    
+    printf("      using '%ls' as output filename instead!\n", path.filename().wstring().c_str());
+    FFExecute::addTextToFFOFile("using '" + path.filename().string() + "' as output filename instead!\n");
+    return path;
 }
 
 void FFExecute::openFFOFile()
@@ -195,7 +200,7 @@ void FFExecute::skipFileAction()
     fprintf(stderr, "    inFile is already H265! " COLOR_YELLOW "Skipping" COLOR_RESET "!\n");
     FFExecute::addTextToFFOFile("    inFile is already H265! Skipping!\n");
 }
-bool FFExecute::copyFileAction(cstr from, cstr to)
+bool FFExecute::copyFileAction(cpath from, cpath to)
 {
     fprintf(stderr, "    inFile is already H265! " COLOR_YELLOW "Copying" COLOR_RESET "!\n");
     FFExecute::addTextToFFOFile("    inFile is already H265! Copying!\n");
@@ -214,8 +219,7 @@ bool FFExecute::copyFileAction(cstr from, cstr to)
         return false;
     }
 }
-
-bool FFExecute::moveFileAction(cstr from, cstr to)
+bool FFExecute::moveFileAction(cpath from, cpath to)
 {
     fprintf(stderr, "    inFile is already H265! " COLOR_YELLOW "Moving" COLOR_RESET "!\n");
     FFExecute::addTextToFFOFile("    inFile is already H265! Moving!\n");
@@ -235,11 +239,11 @@ bool FFExecute::moveFileAction(cstr from, cstr to)
     }
 }
 
-void FFExecute::moveDateOfFile(cstr from, cstr to)
+void FFExecute::moveDateOfFile(cpath from, cpath to)
 {
     ChangeFileDate::setHandleFFprobeOutput(FFExecute::addTextToFFOFile);
 
-    if(!ChangeFileDate::fromFileToFile(from, to))
+    if(!ChangeFileDate::fromFileToFile(from.string(), to.string()))
     {
         fprintf(stderr, "    Changing date of the file " COLOR_RED "failed" COLOR_RESET );
         FFExecute::addTextToFFOFile("    Changing date of the file failed");
@@ -247,7 +251,7 @@ void FFExecute::moveDateOfFile(cstr from, cstr to)
     }
 }
 
-void FFExecute::moveCorrectlyFinishedFile(cstr from, cstr to)
+void FFExecute::moveCorrectlyFinishedFile(cpath from, cpath to)
 {
     try
     {
@@ -257,11 +261,11 @@ void FFExecute::moveCorrectlyFinishedFile(cstr from, cstr to)
     {
         fprintf(stderr, "    Moving finished file " COLOR_RED "failed" COLOR_RESET ": %s\n", e.what());
         FFExecute::addTextToFFOFile("    Moving finished file failed: " + str( e.what() ));
-        OtherError::addError("Moving finished file from: '" + from + "', to: '" + to + "' failed", __PRETTY_FUNCTION__);
+        OtherError::addError("Moving finished file from: '" + from.string() + "', to: '" + to.string() + "' failed", __PRETTY_FUNCTION__);
     }
 }
 
-void FFExecute::handleAlreadyH265File(cstr inFile, str outFile)
+void FFExecute::handleAlreadyH265File(cpath inFile, cpath outFile)
 {
     // in file is already H265 format!
 
@@ -303,14 +307,13 @@ void FFExecute::handleAlreadyH265File(cstr inFile, str outFile)
     return;
 }
 
-str FFExecute::makeStringPathExistForCMD(cstr path)
+str FFExecute::makeStringPathExistForCMD(cpath path)
 {
-    fs::path p(path);
-    std::wstring ws(p.wstring());
+    std::wstring ws(path.wstring());
     return str(ws.begin(), ws.end());
 }
 
-void FFExecute::runFFmpegTest(cstr inFile)
+void FFExecute::runFFmpegTest(cpath inFile)
 {
     FFExecute::openFFOFile();
 
@@ -327,11 +330,14 @@ void FFExecute::runFFmpegTest(cstr inFile)
     FFExecute::closeFFOFile();
 }
 
-void FFExecute::runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile)
+void FFExecute::runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile)
 {
     FFExecute::openFFOFile();
 
-    FFExecute::runFFmpegForce2(inFile, outFile, moveFile);
+    // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
+    fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
+
+    FFExecute::runFFmpegForce2(inFile, validOutFile, moveFile);
     ++ m_performedFFmpegs;
     
     printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
@@ -342,11 +348,14 @@ void FFExecute::runFFmpegForce(cstr inFile, cstr outFile, cstr moveFile)
     FFExecute::closeFFOFile();
 }
 
-void FFExecute::runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile)
+void FFExecute::runFFmpegStandard(cpath inFile, cpath outFile, cpath moveFile)
 {
     FFExecute::openFFOFile();
 
-    FFExecute::runFFmpegStandard2(inFile, outFile, moveFile);
+    // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
+    fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
+
+    FFExecute::runFFmpegStandard2(inFile, validOutFile, moveFile);
     ++ m_performedFFmpegs;
     
     printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
@@ -357,12 +366,13 @@ void FFExecute::runFFmpegStandard(cstr inFile, cstr outFile, cstr moveFile)
     FFExecute::closeFFOFile();
 }
 
-void FFExecute::runFFmpegTest2(cstr inFile)
+void FFExecute::runFFmpegTest2(cpath inFile)
 {
-    printf("  in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
+    str inFileStr = inFile.string();
+    printf("  in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFileStr + "\n");
     
     FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
-    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
+    FFExecute::addTextToFFOFile("    in:  " + inFileStr + "\n");
     // seprate case when input file not exist
     if(!fs::exists(inFile))
     {
@@ -393,15 +403,11 @@ void FFExecute::runFFmpegTest2(cstr inFile)
     ++ m_correctlyPerformedFFmpegs;
 }
 
-void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
+void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
 {
     printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
-
-    // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
-    outFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
-
-    printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
-    printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
+    printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
+    printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
 
     // seprate case when input file not exist
     if(!fs::exists(inFile))
@@ -490,15 +496,11 @@ void FFExecute::runFFmpegForce2(cstr inFile, str outFile, cstr moveFile)
     }
 }
 
-void FFExecute::runFFmpegStandard2(cstr inFile, str outFile, cstr moveFile)
+void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
 {
     printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
-
-    // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
-    outFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
-    
-    printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile + "\n");
-    printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile + "\n");
+    printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
+    printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
 
     // seprate case when input file not exist
     if(!fs::exists(inFile))
@@ -642,7 +644,7 @@ void FFExecute::setffOFileDirectory(fs::path directory)
     m_ffOFileDirectory = directory;
 }
 
-void FFExecute::runFFmpeg(cstr inFile, cstr outFile, cstr moveFile)
+void FFExecute::runFFmpeg(cpath inFile, cpath outFile, cpath moveFile)
 {
     try{
         if(m_skipAction == SkipAction::Test)

@@ -72,7 +72,7 @@ int main(int argc, const char **argv)
         fs::path outFile = createOutputFile(inFile, inDirectory, outDirectory);
         fs::path OFCFile = createOFCFile(inFile, inDirectory, OFCDirectory);
         
-        FFExecute::runFFmpeg(inFile.string(), outFile.string(), OFCFile.string());
+        FFExecute::runFFmpeg(inFile, outFile, OFCFile);
 
     }
 
