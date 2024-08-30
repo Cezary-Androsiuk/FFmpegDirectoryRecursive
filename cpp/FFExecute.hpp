@@ -11,6 +11,7 @@
 #include "FFTester.hpp"
 #include "OtherError.hpp"
 #include "ChangeFileDate.hpp"
+#include "TestPipe.hpp"
 #include "enums/SkipAction.hpp"
 
 namespace fs = std::filesystem;
@@ -76,7 +77,7 @@ public:
     static str makeFileProgressPostfix(bool addColors = true);
     static void setTotalFFmpegsToPerform(int count);
     static void setSkipAction(SkipAction skipAction);
-    static void setffOFileDirectory(fs::path directory);
+    static void setffOFileDirectory(cpath directory);
     static void runFFmpeg(cpath inFile, cpath outFile, cpath moveFile);
 
 private:

@@ -373,11 +373,20 @@ void FFExecute::runFFmpegTest2(cpath inFile)
     
     FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
     FFExecute::addTextToFFOFile("    in:  " + inFileStr + "\n");
+    
     // seprate case when input file not exist
     if(!fs::exists(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
         FFExecute::addTextToFFOFile("    Input file not exist!\n");
+        ++ m_failedFFmpegs;
+        return;
+    }
+
+    if(!TestPipe::testName(inFile))
+    {
+        fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    Input file cannot be passed as argument to other program!\n");
         ++ m_failedFFmpegs;
         return;
     }
@@ -414,6 +423,14 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
     {
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
         FFExecute::addTextToFFOFile("    Input file not exist!\n");
+        ++ m_failedFFmpegs;
+        return;
+    }
+
+    if(!TestPipe::testName(inFile))
+    {
+        fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    Input file cannot be passed as argument to other program!\n");
         ++ m_failedFFmpegs;
         return;
     }
@@ -507,6 +524,14 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     {
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
         FFExecute::addTextToFFOFile("    Input file not exist!\n");
+        ++ m_failedFFmpegs;
+        return;
+    }
+
+    if(!TestPipe::testName(inFile))
+    {
+        fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
+        FFExecute::addTextToFFOFile("    Input file cannot be passed as argument to other program!\n");
         ++ m_failedFFmpegs;
         return;
     }
@@ -639,7 +664,7 @@ void FFExecute::setSkipAction(SkipAction skipAction)
     m_skipAction = skipAction;
 }
 
-void FFExecute::setffOFileDirectory(fs::path directory)
+void FFExecute::setffOFileDirectory(cpath directory)
 {
     m_ffOFileDirectory = directory;
 }
