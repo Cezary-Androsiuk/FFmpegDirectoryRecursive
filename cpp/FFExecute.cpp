@@ -245,7 +245,7 @@ void FFExecute::moveDateOfFile(cpath from, cpath to)
 
     if(!ChangeFileDate::fromFileToFile(from.string(), to.string()))
     {
-        fprintf(stderr, "    Changing date of the file " COLOR_RED "failed" COLOR_RESET );
+        fprintf(stderr, "    Changing date of the file " COLOR_RED "failed" COLOR_RESET "\n");
         FFExecute::addTextToFFOFile("    Changing date of the file failed");
         OtherError::addError("    Changing date of the file failed", __PRETTY_FUNCTION__);
     }
@@ -323,9 +323,13 @@ void FFExecute::runFFmpegTest(cpath inFile)
     if(m_performedFFmpegs == m_totalFFmpegsToPerform)
         printf("\nStatus: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
 
-    FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
-    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
-    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
+    FFExecute::addTextToFFOFile("\n    Status " + FFExecute::makeFileProgressPostfix(false) + "\n");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("\n\n\n\n\n\n\n\n\n");
     
     FFExecute::closeFFOFile();
 }
@@ -341,9 +345,13 @@ void FFExecute::runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile)
     ++ m_performedFFmpegs;
     
     printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
-    FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
-    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
-    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
+    FFExecute::addTextToFFOFile("\n    Status " + FFExecute::makeFileProgressPostfix(false));
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("\n\n\n\n\n\n\n\n\n");
     
     FFExecute::closeFFOFile();
 }
@@ -359,9 +367,13 @@ void FFExecute::runFFmpegStandard(cpath inFile, cpath outFile, cpath moveFile)
     ++ m_performedFFmpegs;
     
     printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
-    FFExecute::addTextToFFOFile("    Status " + FFExecute::makeFileProgressPostfix(false));
-    FFExecute::addTextToFFOFile(" -------------------------------------------------------------------");
-    FFExecute::addTextToFFOFile("-------------------------------------------------------------------\n\n\n\n\n\n\n\n\n");
+    FFExecute::addTextToFFOFile("\n    Status " + FFExecute::makeFileProgressPostfix(false));
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+    FFExecute::addTextToFFOFile("\n\n\n\n\n\n\n\n\n");
     
     FFExecute::closeFFOFile();
 }
@@ -369,7 +381,7 @@ void FFExecute::runFFmpegStandard(cpath inFile, cpath outFile, cpath moveFile)
 void FFExecute::runFFmpegTest2(cpath inFile)
 {
     str inFileStr = inFile.string();
-    printf("  in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFileStr + "\n");
+    printf("  in:  %s\n", inFileStr.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFileStr + "\n");
     
     FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
     FFExecute::addTextToFFOFile("    in:  " + inFileStr + "\n");
@@ -383,6 +395,8 @@ void FFExecute::runFFmpegTest2(cpath inFile)
         return;
     }
 
+    FFExecute::addTextToFFOFile("\n    TestPipe output:\n");
+    TestPipe::setHandleDirOutput(FFExecute::addTextToFFOFile);
     if(!TestPipe::testName(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
@@ -415,8 +429,8 @@ void FFExecute::runFFmpegTest2(cpath inFile)
 void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
 {
     printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
-    printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
-    printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
+    printf("    in:  %s\n", inFile.string().c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
+    printf("    out: %s\n", outFile.string().c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
 
     // seprate case when input file not exist
     if(!fs::exists(inFile))
@@ -427,6 +441,8 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         return;
     }
 
+    FFExecute::addTextToFFOFile("\n    TestPipe output:\n");
+    TestPipe::setHandleDirOutput(FFExecute::addTextToFFOFile);
     if(!TestPipe::testName(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
@@ -481,9 +497,8 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         }
         catch(const std::exception& e)
         {
-            printf("error while handling output\n");
+            printf("error while handling output in FFExecute\n");
         }
-        
     }
 
     int ffmpegExitCode = pipeClose(pipe);
@@ -516,8 +531,8 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
 void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
 {
     printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
-    printf("    in:  %s\n", inFile.c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
-    printf("    out: %s\n", outFile.c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
+    printf("    in:  %s\n", inFile.string().c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
+    printf("    out: %s\n", outFile.string().c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
 
     // seprate case when input file not exist
     if(!fs::exists(inFile))

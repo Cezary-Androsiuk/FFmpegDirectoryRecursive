@@ -15,6 +15,9 @@ void FFTester::handleOutput(cstr line)
     if(m_addTextToFFOFile != nullptr)
         m_addTextToFFOFile(line);
 
+    if(m_verificationStatus != VerificationStatus::InVerification)
+        return;
+
     if(m_strDuration.empty())
     {
         size_t durationPrefixPos = line.find(FFTester::Patterns::durationPrefix);
@@ -25,7 +28,6 @@ void FFTester::handleOutput(cstr line)
             m_strDuration = line.substr(durationPos, FFTester::Patterns::strtimeTextSize); // gives "00:00:14.77"
         }
     }
-
 
     if(line.find(Patterns::videoPrefix) != str::npos) 
     {
@@ -48,19 +50,13 @@ void FFTester::handleOutput(cstr line)
     }
 }
 
-str FFTester::makeStringPathExistForCMD(cpath path)
-{
-    std::wstring ws(path.wstring());
-    return str(ws.begin(), ws.end());
-}
-
 bool FFTester::canBeConvertedToH265(cpath filePath, bool verbose)
 {
     m_errorInfo.clear();
     m_strDuration.clear();
     m_verificationStatus = VerificationStatus::InVerification;
 
-    str command = "ffprobe -i \"" + FFTester::makeStringPathExistForCMD(filePath) + "\"";
+    str command = "ffprobe -i \"" + filePath.string() + "\"";
     command += " 2>&1"; // move stderr to stdout (connect them)
 
     if(m_addTextToFFOFile != nullptr)
@@ -76,8 +72,14 @@ bool FFTester::canBeConvertedToH265(cpath filePath, bool verbose)
     char buffer[256];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
     {
-        if(m_verificationStatus == VerificationStatus::InVerification)
+        try
+        {
             FFTester::handleOutput(str(buffer));
+        }
+        catch(const std::exception& e)
+        {
+            printf("error while handling output in FFTester\n");
+        }
     }
 
     int ffprobeExitCode = pipeClose(pipe);

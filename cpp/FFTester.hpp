@@ -35,7 +35,6 @@ class FFTester
     };
 
     static void handleOutput(cstr line);
-    static str makeStringPathExistForCMD(cpath path);
 
     enum VerificationStatus{
         InVerification = 0,

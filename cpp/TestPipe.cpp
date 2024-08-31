@@ -1,15 +1,17 @@
 #include "TestPipe.hpp"
 
-str TestPipe::pathToString(cpath path)
+void (*TestPipe::m_addTextToFFOFile)(cstr);
+
+void TestPipe::handleOutput(cstr line)
 {
-    std::wstring w(path.wstring());
-    return str(w.begin(), w.end());
+    if(m_addTextToFFOFile != nullptr)
+        m_addTextToFFOFile(line);
 }
 
 bool TestPipe::testName(cpath path)
 {
-    str command("dir \"" + TestPipe::pathToString(path) + "\" 2>&1");
-
+    str command("dir \"" + path.string() + "\" 2>&1");
+    
     FILE* pipe = pipeOpen(command.c_str(), "r");
     if (!pipe) {
         fprintf(stderr, "failed to open pipe\n");
@@ -18,9 +20,22 @@ bool TestPipe::testName(cpath path)
 
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
-    { }
+    {
+        try
+        {
+            TestPipe::handleOutput(str(buffer));
+        }
+        catch(const std::exception& e)
+        {
+            printf("error while handling output in TestPipe\n");
+        }
+    }
 
     int exitCode = pipeClose(pipe);
     return (exitCode ? false : true);
+}
 
+void TestPipe::setHandleDirOutput(void (*func)(cstr))
+{
+    m_addTextToFFOFile = func;
 }
