@@ -105,8 +105,11 @@ fs::path FFExecute::changeOutputFileNameIfNeeded(fs::path path)
         path = parentPath / (stem + std::wstring(indexText) +  extension);
     }
     
-    printf("      using '%ls' as output filename instead!\n", path.filename().wstring().c_str());
-    FFExecute::addTextToFFOFile("using '" + path.filename().string() + "' as output filename instead!\n");
+    if(index)
+    {
+        printf("  using '%ls' as output filename instead!\n", path.filename().wstring().c_str());
+        FFExecute::addTextToFFOFile("using '" + path.filename().string() + "' as output filename instead!\n");
+    }
     return path;
 }
 
@@ -337,6 +340,7 @@ void FFExecute::runFFmpegTest(cpath inFile)
 void FFExecute::runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile)
 {
     FFExecute::openFFOFile();
+    printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
 
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
@@ -359,6 +363,7 @@ void FFExecute::runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile)
 void FFExecute::runFFmpegStandard(cpath inFile, cpath outFile, cpath moveFile)
 {
     FFExecute::openFFOFile();
+    printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
 
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
@@ -428,7 +433,6 @@ void FFExecute::runFFmpegTest2(cpath inFile)
 
 void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
 {
-    printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
     printf("    in:  %s\n", inFile.string().c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
     printf("    out: %s\n", outFile.string().c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
 
@@ -530,7 +534,6 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
 
 void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
 {
-    printf("  Starting new FFmpeg\n");          FFExecute::addTextToFFOFile("  Starting new ffmpeg\n");
     printf("    in:  %s\n", inFile.string().c_str());    FFExecute::addTextToFFOFile("    in:  " + inFile.string() + "\n");
     printf("    out: %s\n", outFile.string().c_str());   FFExecute::addTextToFFOFile("    out: " + outFile.string() + "\n");
 
