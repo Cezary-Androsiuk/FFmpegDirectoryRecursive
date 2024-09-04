@@ -8,6 +8,7 @@
 #include "cpp/FFExecute.hpp"
 #include "cpp/ListMaker.hpp"
 #include "cpp/enums/SkipAction.hpp"
+#include "cpp/WinConsoleHandler.hpp"
 
 // locate files recursive
 
@@ -32,33 +33,33 @@ int main(int argc, const char **argv)
     vstr extensions;
     SkipAction skipAction;
     void* arguments[] = {&inDirectory, &extensions, &skipAction};
-    if( !handleArgs(argc, argv, arguments) )
-    {
-        // messages are handle in 'handleArgs' function
+    if( !handleArgs(argc, argv, arguments) ) // messages are handle in 'handleArgs' function
         return 1;
-    }
+
+    if(!WinConsoleHandler::installConsoleHandler()) // messages are handle in 'installConsoleHandler' method
+        return 1;
+
 
     printf("Selected directory: %s\n", inDirectory.string().c_str());
-    fs::path outDirectory = createOutputDirectory(inDirectory, IN_DEBUG);
-    if(outDirectory == fs::path())
+    fs::path outDirectory, OFCDirectory;
+    if(skipAction != SkipAction::Test)
     {
-        // messages are handle in 'createOutputDirectory' function
-        return 1;
+        outDirectory = createOutputDirectory(inDirectory, IN_DEBUG);
+        if(outDirectory == fs::path()) // messages are handle in 'createOutputDirectory' function
+            return 1;
+
+        OFCDirectory = createOCFDirectory(inDirectory, IN_DEBUG);
+        if(OFCDirectory == fs::path()) // messages are handle in 'createOCFDirectory' function
+            return 1;
     }
 
-    fs::path OFCDirectory = createOCFDirectory(inDirectory, IN_DEBUG);
-    if(OFCDirectory == fs::path())
-    {
-        // messages are handle in 'createOCFDirectory' function
-        return 1;
-    }
 
     printf("Found files:\n");
-    vpath listOfFiles = ListMaker::listOfFiles(inDirectory, extensions); // listOfFiles prints them
+    vpath listOfFiles = ListMaker::listOfFiles(inDirectory, extensions); // listOfFiles method also prints files
 
     FFExecute::setTotalFFmpegsToPerform(listOfFiles.size());
     FFExecute::setSkipAction(skipAction);
-    FFExecute::setffOFileDirectory(inDirectory);
+    HandlePipeOutput::setFFOFileDirectory(inDirectory);
     
     printStatusInfo(skipAction);
     if(skipAction != SkipAction::Test)
@@ -73,7 +74,11 @@ int main(int argc, const char **argv)
         fs::path OFCFile = createOFCFile(inFile, inDirectory, OFCDirectory);
         
         FFExecute::runFFmpeg(inFile, outFile, OFCFile);
-
+        if(WinConsoleHandler::combinationCtrlCPressed())
+        {
+            printf("files loop terminated due to Ctrl+C was pressed\n");
+            break;
+        }
     }
 
     deleteDirectoryIfEmpty(outDirectory);

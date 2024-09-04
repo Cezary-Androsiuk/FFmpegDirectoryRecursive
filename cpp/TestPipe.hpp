@@ -22,6 +22,7 @@ class TestPipe
     static void handleOutput(cstr line);
 
 public:
+    static str stringFromPath(cpath path);
     static bool testName(cpath path);
     static void setHandleDirOutput(void (*func)(cstr));
 

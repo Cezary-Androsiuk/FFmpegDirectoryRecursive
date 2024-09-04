@@ -3,7 +3,6 @@
 
 #include <cstdio>
 #include <string>
-#include <sstream> // for getInterpretationOfTime
 #include <ctime>
 #include <fstream>
 #include <filesystem>
@@ -13,6 +12,8 @@
 #include "ChangeFileDate.hpp"
 #include "TestPipe.hpp"
 #include "enums/SkipAction.hpp"
+#include "WinConsoleHandler.hpp"
+#include "HandlePipeOutput.hpp"
 
 namespace fs = std::filesystem;
 
@@ -37,33 +38,15 @@ typedef const fs::path &cpath;
 
 class FFExecute
 {
-    static void handleOutput(cstr line);
-    static void printOutputToCMD(cstr line);
-    static long long myStoll(cstr string) noexcept;
-    static size_t getInterpretationOfTime(cstr strtime);
-    static str getCurrentTime();
     static fs::path changeOutputFileNameIfNeeded(fs::path path);
-
-    static void openFFOFile(); // FFOFile is FFmpegOutputFile
-    static void addTextToFFOFile(cstr ffmpegOutput); // FFOFile is FFmpegOutputFile
-    static void closeFFOFile(); // FFOFile is FFmpegOutputFile
-
-    static int lengthOfNumber(int number);
-    static str numberThatOccupiesGivenSpace(int number, int space);
-
-    static void clearLine(int len);
-    static str splitNumberByThousands(int number, char separator = ' ');
-    static void printProgress(int progress);
 
     static void skipFileAction();
     static bool copyFileAction(cpath from, cpath to);
     static bool moveFileAction(cpath from, cpath to);
+    static void handleAlreadyH265File(cpath inFile, cpath outFile);
 
     static void moveDateOfFile(cpath from, cpath to);
     static void moveCorrectlyFinishedFile(cpath from, cpath to);
-
-    static void handleAlreadyH265File(cpath inFile, cpath outFile);
-    static str makeStringPathExistForCMD(cpath path);
     
     static void runFFmpegTest(cpath inFile);
     static void runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile);
@@ -77,7 +60,6 @@ public:
     static str makeFileProgressPostfix(bool addColors = true);
     static void setTotalFFmpegsToPerform(int count);
     static void setSkipAction(SkipAction skipAction);
-    static void setffOFileDirectory(cpath directory);
     static void runFFmpeg(cpath inFile, cpath outFile, cpath moveFile);
 
 private:
@@ -88,10 +70,6 @@ private:
     static int m_totalFFmpegsToPerform;
     static SkipAction m_skipAction;
     
-    static std::ofstream m_ffOFile; // ffOFile is FFmpegOutputFile
-    static str m_ffOFileName; // ffOFile is FFmpegOutputFile
-    static fs::path m_ffOFileDirectory;
-    static str m_strDuration;
 };
 
 #endif
