@@ -56,13 +56,13 @@ bool FFTester::canBeConvertedToH265(cpath filePath, bool verbose)
     m_strDuration.clear();
     m_verificationStatus = VerificationStatus::InVerification;
 
-    str command = "ffprobe -i \"" + filePath.string() + "\"";
-    command += " 2>&1"; // move stderr to stdout (connect them)
+    std::wstring command = L"ffprobe -i \"" + filePath.wstring() + L"\"";
+    command += L" 2>&1"; // move stderr to stdout (connect them)
 
     if(m_addTextToFFOFile != nullptr)
-        m_addTextToFFOFile("    command: " + command + "\n\n");
+        m_addTextToFFOFile("    command: " + str(command.begin(), command.end()) + "\n\n");
 
-    FILE* pipe = pipeOpen(command.c_str(), "r");
+    FILE* pipe = wpipeOpen(command.c_str(), L"r");
     if (!pipe) {
         fprintf(stderr, "Cannot open the pipe!\n");
         m_errorInfo = "Cannot open the pipe!";

@@ -33,7 +33,7 @@ typedef const fs::path &cpath;
 
 // ,,Since a Microsoft compiler is used, an underscore is needed at the beginning''
 // https://stackoverflow.com/questions/38876218/execute-a-command-and-get-output-popen-and-pclose-undefined
-#define pipeOpen(...) _popen(__VA_ARGS__)
+#define wpipeOpen(...) _wpopen(__VA_ARGS__)
 #define pipeClose(...) _pclose(__VA_ARGS__)
 
 class FFExecute

@@ -19,7 +19,7 @@ typedef const fs::path &cpath;
 #define COLOR_GREEN   "\033[32m"
 #define TEXT_BOLD     "\033[1m"
 
-#define pipeOpen(...) _popen(__VA_ARGS__)
+#define wpipeOpen(...) _wpopen(__VA_ARGS__)
 #define pipeClose(...) _pclose(__VA_ARGS__)
 
 class FFTester

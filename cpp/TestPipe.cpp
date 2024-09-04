@@ -8,17 +8,11 @@ void TestPipe::handleOutput(cstr line)
         m_addTextToFFOFile(line);
 }
 
-str TestPipe::stringFromPath(cpath path)
-{
-    std::wstring ws = path.wstring();
-    return std::string(ws.begin(), ws.end());
-}
-
 bool TestPipe::testName(cpath path)
 {
-    str command("dir \"" + TestPipe::stringFromPath(path) + "\" 2>&1");
+    std::wstring command(L"dir \"" + path.wstring() + L"\" 2>&1");
     
-    FILE* pipe = pipeOpen(command.c_str(), "r");
+    FILE* pipe = wpipeOpen(command.c_str(), L"r");
     if (!pipe) {
         fprintf(stderr, "failed to open pipe\n");
         return false;

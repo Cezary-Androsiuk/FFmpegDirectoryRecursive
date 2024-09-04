@@ -123,7 +123,6 @@ void FFExecute::handleAlreadyH265File(cpath inFile, cpath outFile)
 
 
 
-
 void FFExecute::moveDateOfFile(cpath from, cpath to)
 {
     ChangeFileDate::setHandleFFprobeOutput(HandlePipeOutput::addToFFOFile);
@@ -280,12 +279,12 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         }
     }
 
-    str command = "ffmpeg -i \"" + TestPipe::stringFromPath(inFile) + 
-        "\" -c:v libx265 -vtag hvc1 \"" + TestPipe::stringFromPath(outFile) + "\"";
-    command += " 2>&1"; // move stderr to stdout (connect them)
+    std::wstring command = L"ffmpeg -i \"" + inFile.wstring() + 
+        L"\" -c:v libx265 -vtag hvc1 \"" + outFile.wstring() + L"\"";
+    command += L" 2>&1"; // move stderr to stdout (connect them)
 
     HandlePipeOutput::addToFFOFile("\n    FFmpeg output:\n");
-    HandlePipeOutput::addToFFOFile("    command: " + command + "\n\n");
+    HandlePipeOutput::addToFFOFile("    command: " + str(command.begin(), command.end()) + "\n\n");
 
     int duration = HandlePipeOutput::getInterpretationOfTime(FFTester::getStrDuration());
     HandlePipeOutput::setStringDuration(HandlePipeOutput::splitNumberByThousands(duration, ' '));
@@ -293,7 +292,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
 
 
     
-    FILE* pipe = pipeOpen(command.c_str(), "r");
+    FILE* pipe = wpipeOpen(command.c_str(), L"r");
     if (!pipe) {
         fprintf(stderr, "    " COLOR_RED "Cannot open the pipe" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Cannot open the pipe!\n");
@@ -381,12 +380,12 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         return;
     }
 
-    str command = "ffmpeg -i \"" + TestPipe::stringFromPath(inFile) + 
-        "\" -c:v libx265 -vtag hvc1 \"" + TestPipe::stringFromPath(outFile) + "\"";
-    command += " 2>&1"; // move stderr to stdout (connect them)
+    std::wstring command = L"ffmpeg -i \"" + inFile.wstring() + 
+        L"\" -c:v libx265 -vtag hvc1 \"" + outFile.wstring() + L"\"";
+    command += L" 2>&1"; // move stderr to stdout (connect them)
 
     HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    FFmpeg output:\n");
-    HandlePipeOutput::addToFFOFile("    command: " + command + "\n\n");
+    HandlePipeOutput::addToFFOFile("    command: " + str(command.begin(), command.end()) + "\n\n");
 
     int duration = HandlePipeOutput::getInterpretationOfTime(FFTester::getStrDuration());
     HandlePipeOutput::setStringDuration(HandlePipeOutput::splitNumberByThousands(duration, ' '));
@@ -394,7 +393,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
 
 
     
-    FILE* pipe = pipeOpen(command.c_str(), "r");
+    FILE* pipe = wpipeOpen(command.c_str(), L"r");
     if (!pipe) {
         fprintf(stderr, "    " COLOR_RED "Cannot open the pipe" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Cannot open the pipe!\n");
