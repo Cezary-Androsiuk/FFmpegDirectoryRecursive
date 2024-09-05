@@ -21,7 +21,7 @@ typedef std::string str;
 typedef const std::string &cstr;
 typedef const fs::path &cpath;
 
-#define FFMPEG_OUTPUT_FILE(time) ("FFmpeg_output-" + time + ".txt") 
+#define TRY(x, y) try{ x } catch(std::exception &e) {printf("-> %s: %s\n", std::string(y).c_str(), e.what());}
 
 #define COLOR_RESET   "\033[0m"
 #define COLOR_RED     "\033[31m"

@@ -428,7 +428,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     else // no error - ffmpeg finished correctly
     {
         ++ m_correctlyPerformedFFmpegs;
-        HandlePipeOutput::printProgress(0, std::to_string(duration));
+        HandlePipeOutput::printProgress(duration, std::to_string(duration));
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    FFmpeg finished!\n");

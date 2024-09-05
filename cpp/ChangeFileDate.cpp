@@ -36,7 +36,9 @@ bool ChangeFileDate::getFileTime(
         NULL
     );
     
-    str strFilename(std::wstring(filename).begin(), std::wstring(filename).end());
+    str strFilename;
+    for(const wchar_t &character : std::wstring(filename))
+        strFilename.push_back(static_cast<char>(character));
 
     if(hfile == INVALID_HANDLE_VALUE)
     {
@@ -79,7 +81,9 @@ bool ChangeFileDate::setFileTime(
         NULL
     );
 
-    str strFilename(std::wstring(filename).begin(), std::wstring(filename).end());
+    str strFilename;
+    for(const wchar_t &character : std::wstring(filename))
+        strFilename.push_back(static_cast<char>(character));
 
     if(hfile == INVALID_HANDLE_VALUE)
     {
@@ -125,12 +129,10 @@ void ChangeFileDate::addTextToFFOFile(cstr text)
 
 bool ChangeFileDate::fromFileToFile(cpath from, cpath to)
 {
-    const str strFrom(from.wstring().begin(), from.wstring().end());
-    const str strTo(to.wstring().begin(), to.wstring().end());
     if( !fs::exists(from) || !fs::exists(to) )
     {
-        fprintf(stderr, "    one of the files not exist can't change file date '%s' '%s' !\n", strFrom.c_str(), strTo.c_str());
-        ChangeFileDate::addTextToFFOFile("one of the files not exist can't change file date '" + strFrom + "' '" + strTo);
+        fprintf(stderr, "    one of the files not exist can't change file date '%s' '%s' !\n", from.string().c_str(), to.string().c_str());
+        ChangeFileDate::addTextToFFOFile("one of the files not exist can't change file date '" + from.string() + "' '" + to.string());
         return false;
     }
     
@@ -146,7 +148,7 @@ bool ChangeFileDate::fromFileToFile(cpath from, cpath to)
     str date = "{ creationTime: " + ChangeFileDate::stringTimeFromSystemTime(&creationTime) + 
         ", modificationTime: " + ChangeFileDate::stringTimeFromSystemTime(&modificationTime) + " }";
 
-    ChangeFileDate::addTextToFFOFile("from file '" + strFrom + "' readed date " + date);
+    ChangeFileDate::addTextToFFOFile("from file '" + from.string() + "' readed date " + date);
 
     if(!ChangeFileDate::setFileTime(to.wstring().c_str(), &creationTime, &modificationTime))
     {
@@ -155,7 +157,7 @@ bool ChangeFileDate::fromFileToFile(cpath from, cpath to)
         return false;
     }
 
-    ChangeFileDate::addTextToFFOFile("date " + date + " assigned to file '" + strTo + "'");
+    ChangeFileDate::addTextToFFOFile("date " + date + " assigned to file '" + to.string() + "'");
 
     return true;
 }
