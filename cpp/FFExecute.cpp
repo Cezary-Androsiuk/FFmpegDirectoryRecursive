@@ -252,7 +252,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         return;
     }
 
-    HandlePipeOutput::addToFFOFile("\n    TestPipe output:\n");
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    TestPipe output:\n");
     TestPipe::setHandleDirOutput(HandlePipeOutput::addToFFOFile);
     if(!TestPipe::testName(inFile))
     {
@@ -262,7 +262,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         return;
     }
 
-    HandlePipeOutput::addToFFOFile("\n    FFprobe output:\n");
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    FFprobe output:\n");
     FFTester::setHandleFFprobeOutput(HandlePipeOutput::addToFFOFile);
 
     // FFTester will set "strDuration" so there is no way to get rid of it
@@ -283,7 +283,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         L"\" -c:v libx265 -vtag hvc1 \"" + outFile.wstring() + L"\"";
     command += L" 2>&1"; // move stderr to stdout (connect them)
 
-    HandlePipeOutput::addToFFOFile("\n    FFmpeg output:\n");
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    FFmpeg output:\n");
     HandlePipeOutput::addToFFOFile("    command: " + str(command.begin(), command.end()) + "\n\n");
 
     int duration = HandlePipeOutput::getInterpretationOfTime(FFTester::getStrDuration());
@@ -353,6 +353,8 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         return;
     }
 
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    TestPipe output:\n");
+    TestPipe::setHandleDirOutput(HandlePipeOutput::addToFFOFile);
     if(!TestPipe::testName(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
@@ -361,7 +363,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         return;
     }
 
-    HandlePipeOutput::addToFFOFile("\n    FFprobe output:\n");
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    FFprobe output:\n");
     FFTester::setHandleFFprobeOutput(HandlePipeOutput::addToFFOFile);
 
     if(!FFTester::canBeConvertedToH265(inFile))
@@ -501,7 +503,12 @@ void FFExecute::runFFmpeg(cpath inFile, cpath outFile, cpath moveFile)
         else
             FFExecute::runFFmpegStandard(inFile, outFile, moveFile);
 
-        
+        HandlePipeOutput::addToFFOFile("\n -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
+        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
         HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
         HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
         HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
