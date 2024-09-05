@@ -18,7 +18,7 @@ bool WinConsoleHandler::combinationCtrlCPressed()
 
 BOOL WINAPI WinConsoleHandler::ConsoleHandler(DWORD signal) {
     if (signal == CTRL_C_EVENT) {
-        printf("Ctrl+C was pressed!\n");
+        printf("\n\nCtrl+C was pressed!\n\n");
         m_combinationCtrlCPressed = true;
     }
     return TRUE;

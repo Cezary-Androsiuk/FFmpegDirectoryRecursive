@@ -123,6 +123,13 @@ void FFExecute::handleAlreadyH265File(cpath inFile, cpath outFile)
 
 
 
+void FFExecute::handleStop(cpath inFile, cpath outFile)
+{
+    // rename back
+    // remove created file
+    printf("performing ffmpeg stopped due to Ctrl+C combination was pressed\n");
+}
+
 void FFExecute::moveDateOfFile(cpath from, cpath to)
 {
     ChangeFileDate::setHandleFFprobeOutput(HandlePipeOutput::addToFFOFile);
@@ -310,6 +317,12 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         {
             printf("error while handling output in FFExecute\n");
         }
+        
+        if(WinConsoleHandler::combinationCtrlCPressed())
+        {
+            FFExecute::handleStop(inFile, outFile);
+            return;
+        }
     }
 
     int ffmpegExitCode = pipeClose(pipe);
@@ -414,6 +427,11 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
             printf("error while handling output\n");
         }
         
+        if(WinConsoleHandler::combinationCtrlCPressed())
+        {
+            FFExecute::handleStop(inFile, outFile);
+            return;
+        }
     }
 
     int ffmpegExitCode = pipeClose(pipe);

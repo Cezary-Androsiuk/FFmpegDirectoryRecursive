@@ -21,7 +21,7 @@ typedef std::string str;
 typedef const std::string &cstr;
 typedef const fs::path &cpath;
 
-#define TRY(x, y) try{ x } catch(std::exception &e) {printf("-> %s: %s\n", std::string(y).c_str(), e.what());}
+#define TRY(x, y) try{ x } catch(std::exception &e) {printf("%s %s\n", std::string(y).c_str(), e.what());}
 
 #define COLOR_RESET   "\033[0m"
 #define COLOR_RED     "\033[31m"
@@ -45,6 +45,7 @@ class FFExecute
     static bool moveFileAction(cpath from, cpath to);
     static void handleAlreadyH265File(cpath inFile, cpath outFile);
 
+    static void handleStop(cpath inFile, cpath outFile);
     static void moveDateOfFile(cpath from, cpath to);
     static void moveCorrectlyFinishedFile(cpath from, cpath to);
     
