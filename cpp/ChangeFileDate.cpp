@@ -22,11 +22,11 @@ void ChangeFileDate::ownFromSystemTimeToFileTime(
     
 
 bool ChangeFileDate::getFileTime(
-    const char * const filename, 
+    const wchar_t * const filename, 
     SYSTEMTIME * const creationSystemTime, 
     SYSTEMTIME * const modificationSystemTime)
 {
-    HANDLE hfile = CreateFileA(
+    HANDLE hfile = CreateFileW(
         filename,
         GENERIC_READ,
         FILE_SHARE_READ,
@@ -35,11 +35,13 @@ bool ChangeFileDate::getFileTime(
         FILE_ATTRIBUTE_NORMAL,
         NULL
     );
+    
+    str strFilename(std::wstring(filename).begin(), std::wstring(filename).end());
 
     if(hfile == INVALID_HANDLE_VALUE)
     {
-        fprintf(stderr, "    Error while oppening file %s\n", filename);
-        ChangeFileDate::addTextToFFOFile(str("Error while oppening file %s\n") + filename);
+        fprintf(stderr, "    Error while oppening file %ls\n", filename);
+        ChangeFileDate::addTextToFFOFile(str("Error while oppening file %s\n") + strFilename);
         return false;
     }
 
@@ -47,8 +49,9 @@ bool ChangeFileDate::getFileTime(
 
     if(!GetFileTime(hfile, &creationFileTime, NULL, &modificationFileTime))
     {
-        fprintf(stderr, "    Error while reading creation and modification time from file %s\n", filename);
-        ChangeFileDate::addTextToFFOFile(str("Error while reading creation and modification time from file %s\n") + filename);
+        fprintf(stderr, "    Error while reading creation and modification time from file %ls\n", filename);
+        ChangeFileDate::addTextToFFOFile(str("Error while reading creation and modification time from file: ") + 
+            strFilename + "\n");
         CloseHandle(hfile);
         return false;
     }
@@ -62,11 +65,11 @@ bool ChangeFileDate::getFileTime(
 }
 
 bool ChangeFileDate::setFileTime(
-    const char * const filename, 
+    const wchar_t * const filename, 
     const SYSTEMTIME * const creationSystemTime, 
     const SYSTEMTIME * const modificationSystemTime)
 {
-    HANDLE hfile = CreateFileA(
+    HANDLE hfile = CreateFileW(
         filename,
         GENERIC_WRITE,
         0,
@@ -76,10 +79,12 @@ bool ChangeFileDate::setFileTime(
         NULL
     );
 
+    str strFilename(std::wstring(filename).begin(), std::wstring(filename).end());
+
     if(hfile == INVALID_HANDLE_VALUE)
     {
-        fprintf(stderr, "    Error while oppening file %s\n", filename);
-        ChangeFileDate::addTextToFFOFile(str("Error while oppening file %s\n") + filename);
+        fprintf(stderr, "    Error while oppening file %ls\n", filename);
+        ChangeFileDate::addTextToFFOFile(str("Error while oppening file %s\n") + strFilename);
         return false;
     }
 
@@ -89,8 +94,9 @@ bool ChangeFileDate::setFileTime(
 
     if(!SetFileTime(hfile, &creationFileTime, NULL, &modificationFileTime))
     {
-        fprintf(stderr, "    Error while saving creation and modification time to file %s\n", filename);
-        ChangeFileDate::addTextToFFOFile(str("Error while saving creation and modification time to file %s\n") + filename);
+        fprintf(stderr, "    Error while saving creation and modification time to file %ls\n", filename);
+        ChangeFileDate::addTextToFFOFile(str("Error while saving creation and modification time to file: ") + 
+            strFilename + "\n");
         CloseHandle(hfile);
         return false;
     }
@@ -117,27 +123,20 @@ void ChangeFileDate::addTextToFFOFile(cstr text)
         printf("    m_addTextToFFOFile in ChangeFileDate was not specyfied, text: %s\n", text.c_str());
 }
 
-str ChangeFileDate::makeStringPathExistForCMD(cstr path)
+bool ChangeFileDate::fromFileToFile(cpath from, cpath to)
 {
-    fs::path p(path);
-    std::wstring ws(p.wstring());
-    return str(ws.begin(), ws.end());
-}
-
-bool ChangeFileDate::fromFileToFile(cstr from, cstr to)
-{
+    const str strFrom(from.wstring().begin(), from.wstring().end());
+    const str strTo(to.wstring().begin(), to.wstring().end());
     if( !fs::exists(from) || !fs::exists(to) )
     {
-        fprintf(stderr, "    one of the files not exist can't change file date '%s' '%s' !\n", 
-            from.c_str(), to.c_str());
-        ChangeFileDate::addTextToFFOFile("one of the files not exist can't change file date '" + 
-            from + "' '" + to);
+        fprintf(stderr, "    one of the files not exist can't change file date '%s' '%s' !\n", strFrom.c_str(), strTo.c_str());
+        ChangeFileDate::addTextToFFOFile("one of the files not exist can't change file date '" + strFrom + "' '" + strTo);
         return false;
     }
     
     SYSTEMTIME creationTime, modificationTime;
     
-    if(!getFileTime(ChangeFileDate::makeStringPathExistForCMD(from).c_str(), &creationTime, &modificationTime))
+    if(!ChangeFileDate::getFileTime(from.wstring().c_str(), &creationTime, &modificationTime))
     {
         fprintf(stderr, "    getFileTime method failed!\n");
         ChangeFileDate::addTextToFFOFile("getFileTime method failed!\n");
@@ -147,16 +146,16 @@ bool ChangeFileDate::fromFileToFile(cstr from, cstr to)
     str date = "{ creationTime: " + ChangeFileDate::stringTimeFromSystemTime(&creationTime) + 
         ", modificationTime: " + ChangeFileDate::stringTimeFromSystemTime(&modificationTime) + " }";
 
-    ChangeFileDate::addTextToFFOFile("from file '" + from + "' readed date " + date);
+    ChangeFileDate::addTextToFFOFile("from file '" + strFrom + "' readed date " + date);
 
-    if(!setFileTime(ChangeFileDate::makeStringPathExistForCMD(to).c_str(), &creationTime, &modificationTime))
+    if(!ChangeFileDate::setFileTime(to.wstring().c_str(), &creationTime, &modificationTime))
     {
         fprintf(stderr, "    setFileTime method failed!\n");
         ChangeFileDate::addTextToFFOFile("setFileTime method failed!\n");
         return false;
     }
 
-    ChangeFileDate::addTextToFFOFile("date " + date + " assigned to file '" + to + "'");
+    ChangeFileDate::addTextToFFOFile("date " + date + " assigned to file '" + strTo + "'");
 
     return true;
 }

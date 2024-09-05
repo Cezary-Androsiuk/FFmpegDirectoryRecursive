@@ -127,7 +127,7 @@ void FFExecute::moveDateOfFile(cpath from, cpath to)
 {
     ChangeFileDate::setHandleFFprobeOutput(HandlePipeOutput::addToFFOFile);
 
-    if(!ChangeFileDate::fromFileToFile(from.string(), to.string()))
+    if(!ChangeFileDate::fromFileToFile(from, to))
     {
         fprintf(stderr, "    Changing date of the file " COLOR_RED "failed" COLOR_RESET "\n");
         HandlePipeOutput::addToFFOFile("    Changing date of the file failed");
