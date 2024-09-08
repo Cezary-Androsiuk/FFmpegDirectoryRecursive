@@ -126,8 +126,24 @@ void FFExecute::handleAlreadyH265File(cpath inFile, cpath outFile)
 
 void FFExecute::handleStop(cpath inFile, cpath outFile)
 {
-    // rename back
-    // remove created file
+    // rename back if i decided to use currently unsused TemporaryRename.cpp
+    if(fs::exists(outFile))
+    {
+        try
+        {
+            fs::remove(outFile);
+        }
+        catch(const std::exception& e)
+        {
+            fprintf(stderr, COLOR_RED "error while removing outputFile" COLOR_RESET ": %ls, what() = %s\n",
+                outFile.wstring().c_str(), e.what());
+            wstr we;
+            for(char c : str(e.what()))
+                we += c;
+            HandlePipeOutput::addToFFOFile(L"error while removing outputFile: "+outFile.wstring()+L", what() = " + we);
+        }
+        
+    }
     printf("performing ffmpeg stopped due to Ctrl+C combination was pressed\n");
     HandlePipeOutput::addToFFOFile("performing ffmpeg stopped due to Ctrl+C combination was pressed");
 }
@@ -181,7 +197,11 @@ void FFExecute::runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
     FFExecute::runFFmpegForce2(inFile, validOutFile, moveFile);
-    if(WinConsoleHandler::combinationCtrlCPressed()) return; // just exist if pressed Ctrl+C
+    if(WinConsoleHandler::combinationCtrlCPressed()){
+        FFExecute::handleStop(inFile, outFile);
+        // just exist if pressed Ctrl+C
+        return;
+    } 
 
     ++ m_performedFFmpegs;
     
@@ -197,7 +217,11 @@ void FFExecute::runFFmpegStandard(cpath inFile, cpath outFile, cpath moveFile)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
     FFExecute::runFFmpegStandard2(inFile, validOutFile, moveFile);
-    if(WinConsoleHandler::combinationCtrlCPressed()) return; // just exist if pressed Ctrl+C
+    if(WinConsoleHandler::combinationCtrlCPressed()) {
+        FFExecute::handleStop(inFile, outFile);
+        // just exist if pressed Ctrl+C
+        return;
+    } 
 
     ++ m_performedFFmpegs;
     
@@ -329,7 +353,6 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
     {
         if(WinConsoleHandler::combinationCtrlCPressed())
         {
-            FFExecute::handleStop(inFile, outFile);
             // no exit status, all stops
             return;
         }
@@ -447,7 +470,6 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     {
         if(WinConsoleHandler::combinationCtrlCPressed())
         {
-            FFExecute::handleStop(inFile, outFile);
             // no exit status, all stops
             return;
         }
