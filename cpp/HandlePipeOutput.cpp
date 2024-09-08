@@ -229,59 +229,132 @@ bool HandlePipeOutput::lineIsSpam(cwstr line)
     // spam line example: 
     // frame=   11 fps=0.0 q=34.0 size=       0kB time=00:00:02.08 bitrate=   0.2kbits/s dup=2 drop=0 speed=3.86x    
     // there can be multiple of them and but mostly they just occupies the space
-    if(line.find(L"frame=") != 0)
+
+    if(line.size() < 512) // long line is a harmfull one
         return false;
 
-    if(line.find(L"size=") == str::npos)
-        return false;
+    if(line.find(L"frame=") == 0)
+        return true;
+    return false;
+
+
+    // if(line.find(L"frame=") != 0)
+    //     return false;
+
+    // if(line.find(L"size=") == str::npos)
+    //     return false;
         
-    if(line.find(L"time=") == str::npos)
-        return false;
+    // if(line.find(L"time=") == str::npos)
+    //     return false;
 
-    return true;
+    // return true;
+}
+
+void HandlePipeOutput::splitSpamLine(wstr line, std::queue<wstr> &first, std::queue<wstr> &last, const int &linesCount)
+{
+    wchar_t breakChar = (wchar_t)13;
+    size_t breakCharPos = line.find(breakChar);
+    int protect = 0;
+    while(breakCharPos != wstr::npos)
+    {
+        wstr part = line.substr(0, breakCharPos);
+        line.erase(0, breakCharPos+1);
+        breakCharPos = line.find(breakChar);
+
+        // fill first few lines
+        if(first.size() < linesCount)
+        {
+            first.push(part);
+            continue;
+        }
+
+        // fill last few lines 
+        last.push(part);
+        if(last.size() > linesCount)
+            last.pop();
+    }
+    
+    // add if something left
+    if(!line.empty());
+    {
+        last.push(line);
+        if(last.size() > linesCount)
+            last.pop();
+    }
+}
+
+wstr HandlePipeOutput::makeSpamShorter(cwstr line)
+{
+    wstr outputLine;
+    const int linesCount = 5;
+    std::queue<wstr> first, last;
+    HandlePipeOutput::splitSpamLine(line, first, last, linesCount);
+    if(first.size() < linesCount || last.size() < linesCount)
+    {
+        while(!first.empty())
+        {
+            outputLine += first.front() + L"\n";
+            first.pop();
+        }
+        
+        while(!last.empty())
+        {
+            outputLine += last.front() + L"\n";
+            last.pop();
+        }
+    }
+    else
+    {
+        while(!first.empty())
+        {
+            outputLine += first.front() + L"\n";
+            first.pop();
+        }
+        
+        outputLine += L"\n------ REMOVED SPAM ------\n\n";
+
+        while(!last.empty())
+        {
+            outputLine += last.front() + L"\n";
+            last.pop();
+        }
+    }
+    outputLine.pop_back(); // remove last new line character
+    return outputLine;
 }
 
 void HandlePipeOutput::cleanFFOFile()
 {
-    bool ffOFileClosedHere = false;
+    printf("starting cleaning FFOFile\n");
     if(m_ffOFileIsOpen)
     {
-        // close previously oppened file
-        HandlePipeOutput::closeFFOFile();
-        ffOFileClosedHere = true;
+        fprintf(stderr, "FFOFile is in use, first close this file to clean it\n");
+        return;
     }
 
-    fs::path tempFFOfile;
+    fs::path tempFFOfile = moveFFOFileToTemporary();
+    printf("%ls\n", tempFFOfile.wstring().c_str());
 
     std::wifstream ifile(m_ffOFilePath);
     if(!ifile.good())
     {
-        fprintf(stderr, "error while oppening FFOFile! Can't clean it\n");
+        fprintf(stderr, COLOR_RED "error while oppening FFOFile" COLOR_RESET "! Can't clean it\n");
+        OtherError::addError("error while oppening FFOFile! Can't clean it\n", "cleanFFOFile");
         return;
     }
     std::wofstream ofile(tempFFOfile);
-    if(!ifile.good())
+    if(!ofile.good())
     {
-        fprintf(stderr, "error while oppening tempFFOfile! Can't clean it\n");
+        fprintf(stderr, COLOR_RED "error while oppening tempFFOfile" COLOR_RESET "! Can't clean it\n");
+        OtherError::addError("error while oppening tempFFOfile! Can't clean it\n", "cleanFFOFile");
         return;
     }
 
-    wstr buffer;
-    bool lastWasSpam = false;
-    while(std::getline(ifile, buffer))
+    wstr line;
+    while(std::getline(ifile, line))
     {
-        if(HandlePipeOutput::lineIsSpam(buffer))
-        {
-            ofile << L"<>";
-            lastWasSpam = true;
-            continue;
-        }
-
-        if(lastWasSpam)
-            ofile << std::endl;
-
-        ofile << buffer << std::endl;
-        lastWasSpam = false;
+        bool lineIsSpam = HandlePipeOutput::lineIsSpam(line);
+        ofile << (lineIsSpam ? HandlePipeOutput::makeSpamShorter(line) : line) << std::endl;
     }
 
     ifile.close();
@@ -295,18 +368,9 @@ void HandlePipeOutput::cleanFFOFile()
     {
         fprintf(stderr, "Error while renaming tempFFOfile(%ls) to m_ffOFilePath(%ls) : %s\n",
             tempFFOfile.wstring().c_str(), m_ffOFilePath.wstring().c_str(), e.what());
+        return;
     }
-    
-
-    if(ffOFileClosedHere)
-    {
-        HandlePipeOutput::openFFOFile();
-        if(!m_ffOFileIsOpen)
-        {
-            fprintf(stderr, "error while reoppening FFOFile!\n");
-            return;
-        }
-    }
+    printf("cleaning completed successfully!\n");
 }
 
 

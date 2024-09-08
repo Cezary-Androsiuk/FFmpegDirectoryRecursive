@@ -129,6 +129,7 @@ void FFExecute::handleStop(cpath inFile, cpath outFile)
     // rename back
     // remove created file
     printf("performing ffmpeg stopped due to Ctrl+C combination was pressed\n");
+    HandlePipeOutput::addToFFOFile("performing ffmpeg stopped due to Ctrl+C combination was pressed");
 }
 
 void FFExecute::moveDateOfFile(cpath from, cpath to)
@@ -163,6 +164,8 @@ void FFExecute::runFFmpegTest(cpath inFile)
 {
     printf("Status: %s", FFExecute::makeFileProgressPostfix().c_str());
     FFExecute::runFFmpegTest2(inFile);
+    if(WinConsoleHandler::combinationCtrlCPressed()) return; // just exist if pressed Ctrl+C
+
     ++ m_performedFFmpegs;
     if(m_performedFFmpegs == m_totalFFmpegsToPerform)
         printf("\nStatus: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
@@ -178,6 +181,8 @@ void FFExecute::runFFmpegForce(cpath inFile, cpath outFile, cpath moveFile)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
     FFExecute::runFFmpegForce2(inFile, validOutFile, moveFile);
+    if(WinConsoleHandler::combinationCtrlCPressed()) return; // just exist if pressed Ctrl+C
+
     ++ m_performedFFmpegs;
     
     printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
@@ -192,6 +197,8 @@ void FFExecute::runFFmpegStandard(cpath inFile, cpath outFile, cpath moveFile)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
     FFExecute::runFFmpegStandard2(inFile, validOutFile, moveFile);
+    if(WinConsoleHandler::combinationCtrlCPressed()) return; // just exist if pressed Ctrl+C
+
     ++ m_performedFFmpegs;
     
     printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
@@ -320,6 +327,13 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
     {
+        if(WinConsoleHandler::combinationCtrlCPressed())
+        {
+            FFExecute::handleStop(inFile, outFile);
+            // no exit status, all stops
+            return;
+        }
+        
         try
         {
             HandlePipeOutput::handleOutput(str(buffer));
@@ -327,13 +341,6 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         catch(const std::exception& e)
         {
             printf("error while handling output in FFExecute\n");
-        }
-        
-        if(WinConsoleHandler::combinationCtrlCPressed())
-        {
-            FFExecute::handleStop(inFile, outFile);
-            // no exit status, all stops
-            return;
         }
     }
 
@@ -438,6 +445,13 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
     {
+        if(WinConsoleHandler::combinationCtrlCPressed())
+        {
+            FFExecute::handleStop(inFile, outFile);
+            // no exit status, all stops
+            return;
+        }
+        
         try
         {
             HandlePipeOutput::handleOutput(str(buffer));
@@ -445,13 +459,6 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         catch(const std::exception& e)
         {
             printf("error while handling output\n");
-        }
-        
-        if(WinConsoleHandler::combinationCtrlCPressed())
-        {
-            FFExecute::handleStop(inFile, outFile);
-            // no exit status, all stops
-            return;
         }
     }
 
@@ -479,8 +486,10 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         // change create/update date of compressed file
         FFExecute::moveDateOfFile(inFile, outFile);
 
-        // move finished files to directory, that contains finished files
-        FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
+        printf(COLOR_RED "moved File Disabled !!!" COLOR_RESET);
+        fs::remove(outFile);
+        // // move finished files to directory, that contains finished files
+        // FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
     }
 }
 
@@ -563,6 +572,12 @@ void FFExecute::runFFmpeg(cpath inFile, cpath outFile, cpath moveFile)
     }
     
     HandlePipeOutput::closeFFOFile();
+
+    
+        
+    if(WinConsoleHandler::combinationCtrlCPressed()) // do not clean file if Ctrl+C pressed
+        return;
+    HandlePipeOutput::cleanFFOFile();
 }
 
 int FFExecute::getLastExecuteStatus()

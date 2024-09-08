@@ -6,7 +6,11 @@
 #include <sstream> // for getInterpretationOfTime
 #include <fstream>
 #include <filesystem>
-#include <queue> // for cleanFFOFile
+#include <vector>
+#include <queue> // for splitSpamLine
+#include <cctype> // for cleanFFOFile
+
+#include "OtherError.hpp"
 
 namespace fs = std::filesystem;
 
@@ -14,7 +18,11 @@ typedef std::string str;
 typedef std::wstring wstr;
 typedef const std::string &cstr;
 typedef const std::wstring &cwstr;
+typedef std::vector<std::wstring> vwstr;
 typedef const fs::path &cpath;
+
+#define COLOR_RESET   "\033[0m"
+#define COLOR_RED     "\033[31m"
 
 class HandlePipeOutput
 {
@@ -42,6 +50,8 @@ public:
 
     static fs::path moveFFOFileToTemporary();
     static bool lineIsSpam(cwstr line);
+    static void splitSpamLine(wstr line, std::queue<wstr> &first, std::queue<wstr> &last, const int &linesCount);
+    static wstr makeSpamShorter(cwstr line);
     static void cleanFFOFile();
 
     // setters / getters
