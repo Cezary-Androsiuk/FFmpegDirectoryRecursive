@@ -6,6 +6,7 @@ int FFExecute::m_failedFFmpegs = 0;
 int FFExecute::m_skippedFFmpegs = 0;
 int FFExecute::m_totalFFmpegsToPerform = 0;
 SkipAction FFExecute::m_skipAction = SkipAction::Skip;
+int FFExecute::m_lastExecuteStatus = 0;
 
 fs::path FFExecute::changeOutputFileNameIfNeeded(fs::path path)
 {
@@ -211,6 +212,7 @@ void FFExecute::runFFmpegTest2(cpath inFile)
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Input file not exist!\n");
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -221,6 +223,7 @@ void FFExecute::runFFmpegTest2(cpath inFile)
         fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Input file cannot be passed as argument to other program!\n");
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -236,13 +239,16 @@ void FFExecute::runFFmpegTest2(cpath inFile)
             HandlePipeOutput::addToFFOFile("    error occur while checking if file is H265: " + 
                 FFTester::getErrorInfo() + "\n");
             ++ m_failedFFmpegs;
+            m_lastExecuteStatus = 1;
             return;
         }
 
         ++ m_skippedFFmpegs;
+        m_lastExecuteStatus = 2;
         return;
     }
     ++ m_correctlyPerformedFFmpegs;
+    m_lastExecuteStatus = 0;
 }
 
 void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
@@ -256,6 +262,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Input file not exist!\n");
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -266,6 +273,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Input file cannot be passed as argument to other program!\n");
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -282,6 +290,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
             HandlePipeOutput::addToFFOFile("    error occur while executing FFTester: " + 
                 FFTester::getErrorInfo() + "\n");
             ++ m_failedFFmpegs;
+            m_lastExecuteStatus = 1;
             return;
         }
     }
@@ -303,6 +312,8 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
     if (!pipe) {
         fprintf(stderr, "    " COLOR_RED "Cannot open the pipe" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Cannot open the pipe!\n");
+        ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -321,6 +332,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
         if(WinConsoleHandler::combinationCtrlCPressed())
         {
             FFExecute::handleStop(inFile, outFile);
+            // no exit status, all stops
             return;
         }
     }
@@ -332,6 +344,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
     if(ffmpegExitCode) // not equal 0 - error occur in ffmpeg
     {
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_RESET COLOR_RED "failed" COLOR_RESET " with code %d!\n", ffmpegExitCode);
         HandlePipeOutput::addToFFOFile("    FFmpeg failed with code " + std::to_string(ffmpegExitCode) + "!\n");
@@ -339,6 +352,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
     else // no error - ffmpeg finished correctly
     {
         ++ m_correctlyPerformedFFmpegs;
+        m_lastExecuteStatus = 0;
         HandlePipeOutput::printProgress(0, std::to_string(duration));
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
@@ -363,6 +377,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Input file not exist!\n");
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -373,6 +388,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Input file cannot be passed as argument to other program!\n");
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -388,10 +404,12 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
             HandlePipeOutput::addToFFOFile("    error occur while checking if file is H265: " + 
                 FFTester::getErrorInfo() + "\n");
             ++ m_failedFFmpegs;
+            m_lastExecuteStatus = 1;
             return;
         }
 
-        FFExecute::handleAlreadyH265File(inFile, outFile);
+        FFExecute::handleAlreadyH265File(inFile, outFile); // m_skippedFFmpegs are there
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -412,6 +430,8 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     if (!pipe) {
         fprintf(stderr, "    " COLOR_RED "Cannot open the pipe" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    Cannot open the pipe!\n");
+        ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         return;
     }
 
@@ -430,6 +450,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         if(WinConsoleHandler::combinationCtrlCPressed())
         {
             FFExecute::handleStop(inFile, outFile);
+            // no exit status, all stops
             return;
         }
     }
@@ -441,6 +462,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     if(ffmpegExitCode) // not equal 0 - error occur in ffmpeg
     {
         ++ m_failedFFmpegs;
+        m_lastExecuteStatus = 1;
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_RESET COLOR_RED "failed" COLOR_RESET " with code %d!\n", ffmpegExitCode);
         HandlePipeOutput::addToFFOFile("    FFmpeg failed with code " + std::to_string(ffmpegExitCode) + "!\n");
@@ -448,6 +470,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     else // no error - ffmpeg finished correctly
     {
         ++ m_correctlyPerformedFFmpegs;
+        m_lastExecuteStatus = 0;
         HandlePipeOutput::printProgress(duration, std::to_string(duration));
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
@@ -540,4 +563,9 @@ void FFExecute::runFFmpeg(cpath inFile, cpath outFile, cpath moveFile)
     }
     
     HandlePipeOutput::closeFFOFile();
+}
+
+int FFExecute::getLastExecuteStatus()
+{
+    return m_lastExecuteStatus;
 }

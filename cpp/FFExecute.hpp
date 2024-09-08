@@ -62,6 +62,7 @@ public:
     static void setTotalFFmpegsToPerform(int count);
     static void setSkipAction(SkipAction skipAction);
     static void runFFmpeg(cpath inFile, cpath outFile, cpath moveFile);
+    static int getLastExecuteStatus();
 
 private:
     static int m_performedFFmpegs;
@@ -70,7 +71,7 @@ private:
     static int m_skippedFFmpegs;
     static int m_totalFFmpegsToPerform;
     static SkipAction m_skipAction;
-    
+    static int m_lastExecuteStatus;
 };
 
 #endif
