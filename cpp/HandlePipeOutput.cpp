@@ -1,9 +1,10 @@
 #include "HandlePipeOutput.hpp"
 
 std::string HandlePipeOutput::m_stringDuration;
-std::ofstream HandlePipeOutput::m_ffOFile;
+std::wofstream HandlePipeOutput::m_ffOFile;
 fs::path HandlePipeOutput::m_ffOFileDirectory;
 fs::path HandlePipeOutput::m_ffOFilePath;
+bool HandlePipeOutput::m_ffOFileIsOpen = false;
 
 
 long long HandlePipeOutput::myStoll(cstr string) noexcept
@@ -129,10 +130,11 @@ void HandlePipeOutput::printOutputToCMD(cstr line)
     HandlePipeOutput::printProgress(timePassed, m_stringDuration);
 }
 
-void HandlePipeOutput::addTextToFFOFile(cstr line)
+
+void HandlePipeOutput::addTextToFFOFile(cwstr line)
 {
     if(!m_ffOFile.good())
-        printf("ffmpeg output file failed, output text: %s", line.c_str());
+        printf("ffmpeg output file failed, output text: %ls", line.c_str());
     else
         m_ffOFile << line;
 }
@@ -152,10 +154,20 @@ void HandlePipeOutput::printProgress(int progress, cstr duration)
 void HandlePipeOutput::handleOutput(cstr line)
 {
     HandlePipeOutput::printOutputToCMD(line);
-    HandlePipeOutput::addTextToFFOFile(line);
+
+    HandlePipeOutput::addToFFOFile(line);
 }
 
 void HandlePipeOutput::addToFFOFile(cstr text)
+{
+    wstr wstrText;
+    for(char c : text)
+        wstrText.push_back( static_cast<wchar_t>(c) );
+
+    HandlePipeOutput::addTextToFFOFile(wstrText);
+}
+
+void HandlePipeOutput::addToFFOFile(cwstr text)
 {
     HandlePipeOutput::addTextToFFOFile(text);
 }
@@ -164,23 +176,137 @@ void HandlePipeOutput::addToFFOFile(cstr text)
 
 void HandlePipeOutput::openFFOFile()
 {
+    if(m_ffOFileIsOpen)
+    {
+        printf("FFOFile is already open!\n");
+        return;
+    }
+
     // if file was not oppened yet
     if(m_ffOFilePath.empty())
         HandlePipeOutput::createFFOFilePath();
 
-    m_ffOFile = std::ofstream(m_ffOFilePath, std::ios::app);
+    m_ffOFile = std::wofstream(m_ffOFilePath, std::ios::app);
     if(!m_ffOFile.good())
     {
         // i won't fuck with that here...
         // will be handled in addTextToFFOFile
         fprintf(stderr, "Error while oppening ffmpeg output file!");
     }
+    m_ffOFileIsOpen = true;
 }
 
 void HandlePipeOutput::closeFFOFile()
 {
-    m_ffOFile << "\n";
+    if(!m_ffOFileIsOpen)
+    {
+        printf("FFOFile is already closed!\n");
+        return;
+    }
+    m_ffOFile << L"\n";
     m_ffOFile.close();
+    m_ffOFileIsOpen = false;
+}
+
+fs::path HandlePipeOutput::moveFFOFileToTemporary()
+{
+    str stem = m_ffOFilePath.stem().string();
+    str ext = m_ffOFilePath.extension().string();
+
+    fs::path tempPath;
+
+    do{
+        str tempFilename = stem + "-" + HandlePipeOutput::getCurrentTime() + ext;
+        tempPath = m_ffOFileDirectory / tempFilename;
+    }
+    while(fs::exists(tempPath));
+
+    return tempPath;
+}
+
+bool HandlePipeOutput::lineIsSpam(cwstr line)
+{
+    // spam line example: 
+    // frame=   11 fps=0.0 q=34.0 size=       0kB time=00:00:02.08 bitrate=   0.2kbits/s dup=2 drop=0 speed=3.86x    
+    // there can be multiple of them and but mostly they just occupies the space
+    if(line.find(L"frame=") != 0)
+        return false;
+
+    if(line.find(L"size=") == str::npos)
+        return false;
+        
+    if(line.find(L"time=") == str::npos)
+        return false;
+
+    return true;
+}
+
+void HandlePipeOutput::cleanFFOFile()
+{
+    bool ffOFileClosedHere = false;
+    if(m_ffOFileIsOpen)
+    {
+        // close previously oppened file
+        HandlePipeOutput::closeFFOFile();
+        ffOFileClosedHere = true;
+    }
+
+    fs::path tempFFOfile;
+
+    std::wifstream ifile(m_ffOFilePath);
+    if(!ifile.good())
+    {
+        fprintf(stderr, "error while oppening FFOFile! Can't clean it\n");
+        return;
+    }
+    std::wofstream ofile(tempFFOfile);
+    if(!ifile.good())
+    {
+        fprintf(stderr, "error while oppening tempFFOfile! Can't clean it\n");
+        return;
+    }
+
+    wstr buffer;
+    bool lastWasSpam = false;
+    while(std::getline(ifile, buffer))
+    {
+        if(HandlePipeOutput::lineIsSpam(buffer))
+        {
+            ofile << L"<>";
+            lastWasSpam = true;
+            continue;
+        }
+
+        if(lastWasSpam)
+            ofile << std::endl;
+
+        ofile << buffer << std::endl;
+        lastWasSpam = false;
+    }
+
+    ifile.close();
+    ofile.close();
+
+    try
+    {
+        fs::rename(tempFFOfile, m_ffOFilePath);
+    }
+    catch(const std::exception& e)
+    {
+        fprintf(stderr, "Error while renaming tempFFOfile(%ls) to m_ffOFilePath(%ls) : %s\n",
+            tempFFOfile.wstring().c_str(), m_ffOFilePath.wstring().c_str(), e.what());
+    }
+    
+
+    if(ffOFileClosedHere)
+    {
+        HandlePipeOutput::openFFOFile();
+        if(!m_ffOFileIsOpen)
+        {
+            fprintf(stderr, "error while reoppening FFOFile!\n");
+            return;
+        }
+    }
 }
 
 
