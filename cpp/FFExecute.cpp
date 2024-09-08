@@ -486,10 +486,12 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         // change create/update date of compressed file
         FFExecute::moveDateOfFile(inFile, outFile);
 
-        printf(COLOR_RED "moved File Disabled !!!" COLOR_RESET);
-        fs::remove(outFile);
-        // // move finished files to directory, that contains finished files
-        // FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
+        // // debug part
+        // printf(COLOR_RED "moved File Disabled !!!" COLOR_RESET);
+        // fs::remove(outFile);
+
+        // move finished files to directory, that contains finished files
+        FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
     }
 }
 
