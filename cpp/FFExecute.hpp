@@ -52,11 +52,9 @@ class FFExecute
     static void moveCorrectlyFinishedFile(cpath from, cpath to);
     
     static void runFFmpegTest(cpath inFile);
-    static void runFFmpegForce(fs::path inFile, fs::path outFile, fs::path moveFile);
     static void runFFmpegStandard(fs::path inFile, fs::path outFile, fs::path moveFile);
     
     static void runFFmpegTest2(cpath inFile);
-    static void runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile);
     static void runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile);
 
 public:
