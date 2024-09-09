@@ -40,7 +40,7 @@ int main(int argc, const char **argv)
         return 1;
 
 
-    printf("Selected directory: %s\n", inDirectory.string().c_str());
+    printf("Selected directory: %ls\n", inDirectory.wstring().c_str());
     fs::path outDirectory, OFCDirectory;
     if(skipAction != SkipAction::Test)
     {
@@ -82,7 +82,7 @@ int main(int argc, const char **argv)
         
         // handle case, when when the drive disconnect or something
         // but first check if failed
-        if(!FFExecute::getLastExecuteStatus())
+        if(FFExecute::getLastExecuteStatus() != 0)
             continue;
 
         if(!fs::exists(inDirectory));

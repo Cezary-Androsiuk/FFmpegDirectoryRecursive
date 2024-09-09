@@ -1,6 +1,6 @@
 #include "MainMethods.hpp"
 
-str lastError;
+wstr lastError;
 const char possibleSeparators[] = {',', '/', '\\', /*'|', */';', '+', '?'};
 
 vstr splitStringByChar(cstr str, char separator) 
@@ -97,7 +97,7 @@ bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr
     FUNC_START
     if(argc < 4)
     {
-        lastError = "To few arguments!";
+        lastError = L"To few arguments!";
         return false;
     }
 
@@ -107,20 +107,20 @@ bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr
     
     if(!fs::exists( givenDirectory ))
     {
-        lastError = "File " + givenDirectory.string() + " not exist!";
+        lastError = L"File " + givenDirectory.wstring() + L" not exist!";
         return false;
     }
 
     if(!fs::is_directory( givenDirectory ))
     {
-        lastError = "File " + givenDirectory.string() + " is not a directory!";
+        lastError = L"File " + givenDirectory.wstring() + L" is not a directory!";
         return false;
     }
 
     if(givenSkipAction == SkipAction::None)
     {
         // don't use default to not force user to stop algorithm (for example if he spell type wrong)
-        lastError = "Given argument '" + str( argv[3] ) + "' not match possible options!";
+        lastError = L"Given argument '" + toWideString( argv[3] ) + L"' not match possible options!";
         return false;
     }
 
@@ -175,20 +175,20 @@ bool argsValidFlexible(int argc, const char **argv, fs::path *const directory, v
     
     if(!fs::exists( givenDirectory ))
     {
-        lastError = "File " + givenDirectory.string() + " not exist!";
+        lastError = L"File " + givenDirectory.wstring() + L" not exist!";
         return false;
     }
 
     if(!fs::is_directory( givenDirectory ))
     {
-        lastError = "File " + givenDirectory.string() + " is not a directory!";
+        lastError = L"File " + givenDirectory.wstring() + L" is not a directory!";
         return false;
     }
 
     if(givenSkipAction == SkipAction::None)
     {
         // don't use default to not force user to stop algorithm (for example if he spell type wrong)
-        lastError = "Given argument '" + str( argv[3] ) + "' not match possible options!";
+        lastError = L"Given argument '" + toWideString( argv[3] ) + L"' not match possible options!";
         return false;
     }
 
@@ -228,14 +228,14 @@ bool createDirectoryIfValid(fs::path outDirectory)
         // "ffmpeg-h.265" exist, now check if is directory
         if(!fs::is_directory( outDirectory ))
         {
-            lastError = "Output directory already exist, but is not a directory: " + outDirectory.string();
+            lastError = L"Output directory already exist, but is not a directory: " + outDirectory.wstring();
             return false;
         }
 
         if(!isDirectoryEmpty( outDirectory ))
         {
             // this will help to avoid multiple program execution in the same directory
-            lastError = "Output directory already exist, and is not empty: " + outDirectory.string();
+            lastError = L"Output directory already exist, and is not empty: " + outDirectory.wstring();
             return false;
         }
 
@@ -248,7 +248,7 @@ bool createDirectoryIfValid(fs::path outDirectory)
     // "ffmpeg-h.265" not exist, now try to create it
     if(!fs::create_directory( outDirectory ))
     {
-        lastError = "Failed while creating output directory: " + outDirectory.string();
+        lastError = L"Failed while creating output directory: " + outDirectory.wstring();
         return false;
     }
 
@@ -259,22 +259,22 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
 {
     FUNC_START
 
-    str sourceStr = sourceDir.string();
-    str targetStr = targetDir.string();
+    wstr sourceStr = sourceDir.wstring();
+    wstr targetStr = targetDir.wstring();
 
     for(const auto &file : fs::recursive_directory_iterator(sourceDir))
     {
         if(!file.is_directory())
             continue;
 
-        str directoryStr = fs::absolute(file.path()).string();
+        wstr directoryStr = fs::absolute(file.path()).wstring();
         if(directoryStr == sourceStr)
             continue;
         
         size_t startPos = directoryStr.find(sourceStr);
-        if(startPos == str::npos)
+        if(startPos == wstr::npos)
         {
-            lastError = "Error while looking for string '" + sourceStr + "' in '" + directoryStr + "'\n";
+            lastError = L"Error while looking for string '" + sourceStr + L"' in '" + directoryStr + L"'\n";
             return false;
         }
         directoryStr.erase(startPos, sourceStr.size()+1);
@@ -288,7 +288,7 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
         }
         catch(std::filesystem::filesystem_error &e)
         {
-            lastError = "Error while creating directory: " + directoryToCreate.string() + "! Error: " + e.what();
+            lastError = L"Error while creating directory: " + directoryToCreate.wstring() + L"! Error: " + toWideString(e.what());
             return false;
         }
     }
@@ -300,7 +300,7 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
 
 fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist)
 {
-    fs::path outDirectory( inputDirectory.string() + "-ffmpeg-h.265" );
+    fs::path outDirectory( inputDirectory.wstring() + L"-ffmpeg-h.265" );
 
     if(removeDirIfExist)
     {
@@ -312,7 +312,7 @@ fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist)
     {
         fprintf(stderr, 
             COLOR_RESET "Failed while creating output directory:" 
-            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+            COLOR_RED " %ls" COLOR_RESET, lastError.c_str());
         return fs::path();
     }
 
@@ -320,7 +320,7 @@ fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist)
     {
         fprintf(stderr, 
             COLOR_RESET "Failed while creating structure of folders in output directory:" 
-            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+            COLOR_RED " %ls" COLOR_RESET, lastError.c_str());
         return fs::path();
     }
     return outDirectory;
@@ -328,7 +328,7 @@ fs::path createOutputDirectory(cpath inputDirectory, bool removeDirIfExist)
 
 fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFDirectory is OutputCompletedFilesDirectory
 {
-    fs::path OFCDirectory( inputDirectory.string() + "-finished_source_files");
+    fs::path OFCDirectory( inputDirectory.wstring() + L"-finished_source_files");
 
     if(removeDirIfExist)
     {
@@ -340,7 +340,7 @@ fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFD
     {
         fprintf(stderr, 
             COLOR_RESET "Failed while creating output completed files directory:" 
-            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+            COLOR_RED " %ls" COLOR_RESET, lastError.c_str());
         return fs::path();
     }
 
@@ -348,7 +348,7 @@ fs::path createOCFDirectory(cpath inputDirectory, bool removeDirIfExist) // OCFD
     {
         fprintf(stderr, 
             COLOR_RESET "Failed while creating structure of folders in output completed files directory:" 
-            COLOR_RED " %s" COLOR_RESET, lastError.c_str());
+            COLOR_RED " %ls" COLOR_RESET, lastError.c_str());
         return fs::path();
     }
     return OFCDirectory;

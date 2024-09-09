@@ -133,8 +133,14 @@ void HandlePipeOutput::printOutputToCMD(cstr line)
 
 void HandlePipeOutput::addTextToFFOFile(cwstr line)
 {
+    if(!m_ffOFileIsOpen)
+    {
+        printf(COLOR_RED "FFOFile was not oppened yet!\n" COLOR_RESET);
+        return;
+    }
+
     if(!m_ffOFile.good())
-        printf("ffmpeg output file failed, output text: %ls", line.c_str());
+        printf("ffmpeg output file failed, output text: %ls\n", line.c_str());
     else
         m_ffOFile << line;
 }
@@ -160,11 +166,7 @@ void HandlePipeOutput::handleOutput(cstr line)
 
 void HandlePipeOutput::addToFFOFile(cstr text)
 {
-    wstr wstrText;
-    for(char c : text)
-        wstrText.push_back( static_cast<wchar_t>(c) );
-
-    HandlePipeOutput::addTextToFFOFile(wstrText);
+    HandlePipeOutput::addTextToFFOFile(toWideString(text));
 }
 
 void HandlePipeOutput::addToFFOFile(cwstr text)
@@ -178,7 +180,7 @@ void HandlePipeOutput::openFFOFile()
 {
     if(m_ffOFileIsOpen)
     {
-        printf("FFOFile is already open!\n");
+        printf(COLOR_RED "FFOFile is already open!\n" COLOR_RESET);
         return;
     }
 
@@ -191,8 +193,9 @@ void HandlePipeOutput::openFFOFile()
     {
         // i won't fuck with that here...
         // will be handled in addTextToFFOFile
-        fprintf(stderr, "Error while oppening ffmpeg output file!");
+        fprintf(stderr, COLOR_RED "Error while oppening ffmpeg output file" COLOR_RESET "!\n");
     }
+    printf("FFOFile oppened!\n");
     m_ffOFileIsOpen = true;
 }
 
@@ -200,7 +203,7 @@ void HandlePipeOutput::closeFFOFile()
 {
     if(!m_ffOFileIsOpen)
     {
-        printf("FFOFile is already closed!\n");
+        printf(COLOR_RED "FFOFile is already closed!\n" COLOR_RESET);
         return;
     }
     m_ffOFile << L"\n";
@@ -214,9 +217,14 @@ fs::path HandlePipeOutput::moveFFOFileToTemporary()
     str ext = m_ffOFilePath.extension().string();
 
     fs::path tempPath;
-
     do{
-        str tempFilename = stem + "-" + HandlePipeOutput::getCurrentTime() + ext;
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, 10000); 
+        long long random = std::chrono::milliseconds(dis(gen)).count();
+        str randomString = std::to_string(random);
+
+        str tempFilename = stem + "-" + randomString + "-" + HandlePipeOutput::getCurrentTime() + ext;
         tempPath = m_ffOFileDirectory / tempFilename;
     }
     while(fs::exists(tempPath));
@@ -236,18 +244,6 @@ bool HandlePipeOutput::lineIsSpam(cwstr line)
     if(line.find(L"frame=") == 0)
         return true;
     return false;
-
-
-    // if(line.find(L"frame=") != 0)
-    //     return false;
-
-    // if(line.find(L"size=") == str::npos)
-    //     return false;
-        
-    // if(line.find(L"time=") == str::npos)
-    //     return false;
-
-    // return true;
 }
 
 void HandlePipeOutput::splitSpamLine(wstr line, std::queue<wstr> &first, std::queue<wstr> &last, const int &linesCount)
@@ -325,29 +321,29 @@ wstr HandlePipeOutput::makeSpamShorter(cwstr line)
 
 void HandlePipeOutput::cleanFFOFile()
 {
-    printf("starting cleaning FFOFile\n");
+    // printf("starting cleaning FFOFile\n");
     if(m_ffOFileIsOpen)
     {
         fprintf(stderr, "FFOFile is in use, first close this file to clean it\n");
-        OtherError::addError("FFOFile is in use, first close this file to clean it", __PRETTY_FUNCTION__);
+        OtherError::addError(L"FFOFile is in use, first close this file to clean it", __PRETTY_FUNCTION__);
         return;
     }
 
     fs::path tempFFOfile = moveFFOFileToTemporary();
-    printf("%ls\n", tempFFOfile.wstring().c_str());
+    // printf("%ls\n", tempFFOfile.wstring().c_str());
 
     std::wifstream ifile(m_ffOFilePath);
     if(!ifile.good())
     {
         fprintf(stderr, COLOR_RED "error while oppening FFOFile" COLOR_RESET "! Can't clean it\n");
-        OtherError::addError("error while oppening FFOFile! Can't clean it", __PRETTY_FUNCTION__);
+        OtherError::addError(L"error while oppening FFOFile! Can't clean it", __PRETTY_FUNCTION__);
         return;
     }
     std::wofstream ofile(tempFFOfile);
     if(!ofile.good())
     {
         fprintf(stderr, COLOR_RED "error while oppening tempFFOfile" COLOR_RESET "! Can't clean it\n");
-        OtherError::addError("error while oppening tempFFOfile! Can't clean it", __PRETTY_FUNCTION__);
+        OtherError::addError(L"error while oppening tempFFOfile! Can't clean it", __PRETTY_FUNCTION__);
         return;
     }
 
@@ -369,10 +365,10 @@ void HandlePipeOutput::cleanFFOFile()
     {
         fprintf(stderr, "Error while renaming tempFFOfile(%ls) to m_ffOFilePath(%ls) : %s\n",
             tempFFOfile.wstring().c_str(), m_ffOFilePath.wstring().c_str(), e.what());
-        OtherError::addError("Error while renaming tempFFOfile to m_ffOFilePath: " + str(e.what()), __PRETTY_FUNCTION__);
+        OtherError::addError(L"Error while renaming tempFFOfile to m_ffOFilePath: " + toWideString(e.what()), __PRETTY_FUNCTION__);
         return;
     }
-    printf("cleaning completed successfully!\n");
+    printf("FFOFile cleaned successfully!\n");
 }
 
 

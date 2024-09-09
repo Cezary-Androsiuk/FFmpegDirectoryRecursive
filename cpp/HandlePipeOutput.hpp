@@ -7,10 +7,13 @@
 #include <fstream>
 #include <filesystem>
 #include <vector>
+#include <chrono>
+#include <random>
 #include <queue> // for splitSpamLine
 #include <cctype> // for cleanFFOFile
 
 #include "OtherError.hpp"
+#include "BetterConversion.hpp"
 
 namespace fs = std::filesystem;
 

@@ -12,6 +12,7 @@
 #include <fcntl.h>
 
 #include "enums/SkipAction.hpp"
+#include "BetterConversion.hpp"
 
 namespace fs = std::filesystem;
 typedef std::string str;
@@ -23,13 +24,13 @@ typedef const fs::path &cpath;
 typedef std::vector<fs::path> vpath;
 
 
-extern str lastError;
+extern wstr lastError;
 extern const char possibleSeparators[];
 
 
 #define FLEXIBLE_ARGUMENTS false
 
-#define FUNC_START {lastError = "";}
+#define FUNC_START {lastError.clear();}
 
 #define DEFAULT_PATH fs::current_path()
 #define DEFAULT_EXTENSIONS {"mkv", "mp4"}

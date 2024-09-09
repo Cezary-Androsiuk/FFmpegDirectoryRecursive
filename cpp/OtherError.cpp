@@ -1,10 +1,10 @@
 #include "OtherError.hpp"
 
-vstr OtherError::m_errors;
+vwstr OtherError::m_errors;
 
-void OtherError::addError(cstr errorDesc, cstr from)
+void OtherError::addError(cwstr errorDesc, cstr from)
 {
-    str error = errorDesc + ", from: " + from;
+    wstr error = errorDesc + L", from: " + toWideString(from);
     m_errors.push_back(error);
 }
 
@@ -20,11 +20,11 @@ void OtherError::printErrors()
     int index = 0;
     for(const auto &error : m_errors)
     {
-        printf("% 5d - %s\n", ++index, error.c_str());
+        printf("% 5d - %ls\n", ++index, error.c_str());
     }
 }
 
-cvstr OtherError::getErrors()
+cvwstr OtherError::getErrors()
 {
     return m_errors;
 }
