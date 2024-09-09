@@ -39,14 +39,13 @@ public:
     static void createFFOFilePath();
 
     static void printOutputToCMD(cstr line);
-    static void addTextToFFOFile(cwstr line);
+    static void addTextToFFOFile(cstr line);
 
 
 
     static void printProgress(int progress, cstr duration);
     static void handleOutput(cstr line);
     static void addToFFOFile(cstr text);
-    static void addToFFOFile(cwstr text);
 
     static void openFFOFile();
     static void closeFFOFile();
@@ -64,7 +63,7 @@ public:
 private:
     static bool m_ffOFileIsOpen;
     static std::string m_stringDuration;
-    static std::wofstream m_ffOFile; // ffOFile is FFmpegOutputFile
+    static std::ofstream m_ffOFile; // ffOFile is FFmpegOutputFile
     static fs::path m_ffOFileDirectory; // ffOFile is FFmpegOutputFile
     static fs::path m_ffOFilePath; // ffOFile is FFmpegOutputFile
 };

@@ -1,7 +1,7 @@
 #include "HandlePipeOutput.hpp"
 
 std::string HandlePipeOutput::m_stringDuration;
-std::wofstream HandlePipeOutput::m_ffOFile;
+std::ofstream HandlePipeOutput::m_ffOFile;
 fs::path HandlePipeOutput::m_ffOFileDirectory;
 fs::path HandlePipeOutput::m_ffOFilePath;
 bool HandlePipeOutput::m_ffOFileIsOpen = false;
@@ -131,7 +131,7 @@ void HandlePipeOutput::printOutputToCMD(cstr line)
 }
 
 
-void HandlePipeOutput::addTextToFFOFile(cwstr line)
+void HandlePipeOutput::addTextToFFOFile(cstr line)
 {
     if(!m_ffOFileIsOpen)
     {
@@ -140,7 +140,7 @@ void HandlePipeOutput::addTextToFFOFile(cwstr line)
     }
 
     if(!m_ffOFile.good())
-        printf("ffmpeg output file failed, output text: %ls\n", line.c_str());
+        printf("ffmpeg output file failed, output text: %s\n", line.c_str());
     else
         m_ffOFile << line;
 }
@@ -166,11 +166,6 @@ void HandlePipeOutput::handleOutput(cstr line)
 
 void HandlePipeOutput::addToFFOFile(cstr text)
 {
-    HandlePipeOutput::addTextToFFOFile(toWideString(text));
-}
-
-void HandlePipeOutput::addToFFOFile(cwstr text)
-{
     HandlePipeOutput::addTextToFFOFile(text);
 }
 
@@ -188,7 +183,7 @@ void HandlePipeOutput::openFFOFile()
     if(m_ffOFilePath.empty())
         HandlePipeOutput::createFFOFilePath();
 
-    m_ffOFile = std::wofstream(m_ffOFilePath, std::ios::app);
+    m_ffOFile = std::ofstream(m_ffOFilePath, std::ios::app);
     if(!m_ffOFile.good())
     {
         // i won't fuck with that here...
@@ -206,7 +201,7 @@ void HandlePipeOutput::closeFFOFile()
         printf(COLOR_RED "FFOFile is already closed!\n" COLOR_RESET);
         return;
     }
-    m_ffOFile << L"\n";
+    m_ffOFile << "\n";
     m_ffOFile.close();
     m_ffOFileIsOpen = false;
 }

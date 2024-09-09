@@ -1,0 +1,1 @@
+rd /S /Q .\tests\test && rd /S /Q .\tests\test-ffmpeg-h.265 && rd /S /Q .\tests\test-finished_source_files && xcopy .\tests\backupenv\test\ .\tests\test\ /E /H /Q

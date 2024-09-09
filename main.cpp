@@ -12,8 +12,16 @@
 
 // locate files recursive
 
-// compile:
-// g++ main.cpp cpp\MainMethods.cpp cpp\FFExecute.cpp cpp\FFTester.cpp cpp\ListMaker.cpp cpp\OtherError.cpp -o ffmpegRec.exe
+// test commands:
+// xcopy .\tests\backupenv\test\ .\tests\test\ /E /H /Q
+// ffmpegRec .\tests\test avi+mkv+mp4+ move
+// rd /S /Q .\tests\test
+// rd /S /Q .\tests\test-ffmpeg-h.265
+// rd /S /Q .\tests\test-finished_source_files
+
+// prepare test env
+// rd /S /Q .\tests\test && rd /S /Q .\tests\test-ffmpeg-h.265 && rd /S /Q .\tests\test-finished_source_files && xcopy .\tests\backupenv\test\ .\tests\test\ /E /H /Q
+
 
 // instalation(add ffmpegRec.exe to PATH environment):
 // 1 in windows search type "Edit the system environment variables" 

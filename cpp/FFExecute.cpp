@@ -28,7 +28,7 @@ fs::path FFExecute::changeOutputFileNameIfNeeded(fs::path path)
     
     if(index)
     {
-        printf("  using '%ls' as output filename instead!\n", path.filename().wstring().c_str());
+        printf("      using '%ls' as output filename instead!\n", path.filename().wstring().c_str());
         HandlePipeOutput::addToFFOFile("using '" + path.filename().string() + "' as output filename instead!\n");
     }
     return path;
@@ -137,10 +137,7 @@ void FFExecute::handleStop(cpath inFile, cpath outFile)
         {
             fprintf(stderr, COLOR_RED "error while removing outputFile" COLOR_RESET ": %ls, what() = %s\n",
                 outFile.wstring().c_str(), e.what());
-            wstr we;
-            for(char c : str(e.what()))
-                we += c;
-            HandlePipeOutput::addToFFOFile(L"error while removing outputFile: "+outFile.wstring()+L", what() = " + we);
+            HandlePipeOutput::addToFFOFile("error while removing outputFile: "+outFile.string()+", what() = " + e.what());
         }
         
     }
@@ -196,9 +193,9 @@ void FFExecute::runFFmpegForce(fs::path inFile, fs::path outFile, fs::path moveF
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
-    printf("    in:  %ls\n", inFile.wstring().c_str());    HandlePipeOutput::addToFFOFile(L"    in:  " + inFile.wstring() + L"\n");
-    printf("    out: %ls\n", validOutFile.wstring().c_str());   HandlePipeOutput::addToFFOFile(L"    out: " + validOutFile.wstring() + L"\n");
-    printf("    move: %ls\n", moveFile.wstring().c_str());   HandlePipeOutput::addToFFOFile(L"    move: " + moveFile.wstring() + L"\n");
+    printf("    in:  %s\n", inFile.string().c_str());    HandlePipeOutput::addToFFOFile("    in:  " + inFile.string() + "\n");
+    printf("    out: %s\n", validOutFile.string().c_str());   HandlePipeOutput::addToFFOFile("    out: " + validOutFile.string() + "\n");
+    printf("    move: %s\n", moveFile.string().c_str());   HandlePipeOutput::addToFFOFile("    move: " + moveFile.string() + "\n");
 
     // if(!TemporaryRename::makeNameSimple(inFile, validOutFile, moveFile))
     // {
@@ -241,9 +238,9 @@ void FFExecute::runFFmpegStandard(fs::path inFile, fs::path outFile, fs::path mo
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
-    printf("    in:  %ls\n", inFile.wstring().c_str());    HandlePipeOutput::addToFFOFile(L"    in:  " + inFile.wstring() + L"\n");
-    printf("    out: %ls\n", validOutFile.wstring().c_str());   HandlePipeOutput::addToFFOFile(L"    out: " + validOutFile.wstring() + L"\n");
-    printf("    move: %ls\n", moveFile.wstring().c_str());   HandlePipeOutput::addToFFOFile(L"    move: " + moveFile.wstring() + L"\n");
+    printf("    in:  %s\n", inFile.string().c_str());    HandlePipeOutput::addToFFOFile("    in:  " + inFile.string() + "\n");
+    printf("    out: %s\n", validOutFile.string().c_str());   HandlePipeOutput::addToFFOFile("    out: " + validOutFile.string() + "\n");
+    printf("    move: %s\n", moveFile.string().c_str());   HandlePipeOutput::addToFFOFile("    move: " + moveFile.string() + "\n");
 
     // if(!TemporaryRename::makeNameSimple(inFile, validOutFile, moveFile))
     // {
