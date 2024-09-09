@@ -32,7 +32,7 @@ vpath ListMaker::listOfFiles(cpath path, cvstr acceptableExtensions)
         
         if(vectorContains(acceptableExtensions, extension))
         {
-            printf("  file nr % 3d: %ls\n", index, file.path().wstring().c_str());
+            printf("  file nr % 3d: %s\n", index, file.path().string().c_str());
             list.push_back(file.path());
         }
     }

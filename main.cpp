@@ -23,6 +23,7 @@
 // rd /S /Q .\tests\test && rd /S /Q .\tests\test-ffmpeg-h.265 && rd /S /Q .\tests\test-finished_source_files && xcopy .\tests\backupenv\test\ .\tests\test\ /E /H /Q
 
 
+// assuming that ffmpeg is already installed
 // instalation(add ffmpegRec.exe to PATH environment):
 // 1 in windows search type "Edit the system environment variables" 
 // 2 press "Environment Variables..." button
@@ -33,11 +34,13 @@
 
 #define IN_DEBUG false
 
-const char *version = "1.3.7";
+#define VERSION "1.3.8"
+const char *versionLine = "FFmpegRec version " VERSION "\n";
 
 int main(int argc, const char **argv)
 {
-    printf("\nFFmpegRec version %s\n", version);
+    printf("\n%s", versionLine);
+    HandlePipeOutput::setVersionToSave(versionLine);
 
     fs::path inDirectory;
     vstr extensions;

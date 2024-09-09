@@ -5,6 +5,7 @@ std::ofstream HandlePipeOutput::m_ffOFile;
 fs::path HandlePipeOutput::m_ffOFileDirectory;
 fs::path HandlePipeOutput::m_ffOFilePath;
 bool HandlePipeOutput::m_ffOFileIsOpen = false;
+const char *HandlePipeOutput::m_versionToSave = nullptr;
 
 
 long long HandlePipeOutput::myStoll(cstr string) noexcept
@@ -180,8 +181,12 @@ void HandlePipeOutput::openFFOFile()
     }
 
     // if file was not oppened yet
+    bool addVersionBecauseFileJustBeenCreated = false;
     if(m_ffOFilePath.empty())
+    {
         HandlePipeOutput::createFFOFilePath();
+        addVersionBecauseFileJustBeenCreated = true;
+    }
 
     m_ffOFile = std::ofstream(m_ffOFilePath, std::ios::app);
     if(!m_ffOFile.good())
@@ -189,8 +194,17 @@ void HandlePipeOutput::openFFOFile()
         // i won't fuck with that here...
         // will be handled in addTextToFFOFile
         fprintf(stderr, COLOR_RED "Error while oppening ffmpeg output file" COLOR_RESET "!\n");
+        return;
     }
     m_ffOFileIsOpen = true;
+
+    if(addVersionBecauseFileJustBeenCreated)
+    {
+        if(m_versionToSave == nullptr)
+            printf(COLOR_RED "version value wasn't set for HandlePipeOutput class" COLOR_RESET "!\n""Can't save it to FFOFile!\n");
+        else
+            HandlePipeOutput::addTextToFFOFile(m_versionToSave);
+    }
 }
 
 void HandlePipeOutput::closeFFOFile()
@@ -375,4 +389,9 @@ void HandlePipeOutput::setFFOFileDirectory(cpath ffOFileDirectory)
 void HandlePipeOutput::setStringDuration(cstr stringDuration)
 {
     m_stringDuration = stringDuration;
+}
+
+void HandlePipeOutput::setVersionToSave(const char *versionToSave)
+{
+    m_versionToSave = versionToSave;
 }

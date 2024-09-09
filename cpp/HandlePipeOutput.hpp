@@ -59,6 +59,7 @@ public:
     // setters / getters
     static void setFFOFileDirectory(cpath ffOFileDirectory);
     static void setStringDuration(cstr stringDuration);
+    static void setVersionToSave(const char * versionToSave);
 
 private:
     static bool m_ffOFileIsOpen;
@@ -66,6 +67,7 @@ private:
     static std::ofstream m_ffOFile; // ffOFile is FFmpegOutputFile
     static fs::path m_ffOFileDirectory; // ffOFile is FFmpegOutputFile
     static fs::path m_ffOFilePath; // ffOFile is FFmpegOutputFile
+    static const char *m_versionToSave;
 };
 
 
