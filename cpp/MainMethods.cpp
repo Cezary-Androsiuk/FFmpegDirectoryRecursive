@@ -293,7 +293,7 @@ bool copyStructureOfFolders(fs::path sourceDir, fs::path targetDir)
         }
     }
 
-    printf("Structure of folders created\n");
+    printf("Structure of folders created in %s\n", targetDir.filename().string().c_str());
 
     return true;
 }

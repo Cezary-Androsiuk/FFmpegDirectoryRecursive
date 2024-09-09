@@ -34,7 +34,7 @@
 
 #define IN_DEBUG false
 
-#define VERSION "1.3.8"
+#define VERSION "1.3.9"
 const char *versionLine = "FFmpegRec version " VERSION "\n";
 
 int main(int argc, const char **argv)
@@ -54,6 +54,11 @@ int main(int argc, const char **argv)
 
 
     printf("Selected directory: %ls\n", inDirectory.wstring().c_str());
+    HandlePipeOutput::setFFOFileDirectory(inDirectory);
+
+    // create list of files
+    vpath listOfFiles = ListMaker::listOfFiles(inDirectory, extensions); // listOfFiles method also prints files
+    
     fs::path outDirectory, OFCDirectory;
     if(skipAction != SkipAction::Test)
     {
@@ -66,13 +71,8 @@ int main(int argc, const char **argv)
             return 1;
     }
 
-
-    printf("Found files:\n");
-    vpath listOfFiles = ListMaker::listOfFiles(inDirectory, extensions); // listOfFiles method also prints files
-
     FFExecute::setTotalFFmpegsToPerform(listOfFiles.size());
     FFExecute::setSkipAction(skipAction);
-    HandlePipeOutput::setFFOFileDirectory(inDirectory);
     
     printStatusInfo(skipAction);
     if(skipAction != SkipAction::Test)

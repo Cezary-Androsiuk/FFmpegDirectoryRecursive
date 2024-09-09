@@ -20,7 +20,7 @@ class ListMaker
 {
     static bool vectorContains(cvstr vector, cstr string);
 public:
-    static vpath listOfFiles(cpath path, cvstr acceptableExtensions = {"mkv", "mp4"});
+    static vpath listOfFiles(cpath path, cvstr acceptableExtensions, bool printFoundFiles = false);
 };
 
 

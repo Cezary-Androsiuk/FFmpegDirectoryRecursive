@@ -12,16 +12,20 @@ bool ListMaker::vectorContains(cvstr vector, cstr string)
     return false;
 }
 
-vpath ListMaker::listOfFiles(cpath path, cvstr acceptableExtensions)
+vpath ListMaker::listOfFiles(cpath path, cvstr acceptableExtensions, bool printFoundFiles)
 {
+    if(printFoundFiles)
+        printf("Found files:\n");
+
     vpath list;
-    int index = 0;
+    size_t foundFiles = 0;
+    size_t filesMatch = 0;
     for(const auto &file : std::filesystem::recursive_directory_iterator(path))
     {
         // printf("\ntesting: %s\n", file.path().string().c_str());
         if(!file.is_regular_file())
             continue;
-        ++index;
+        ++foundFiles;
 
         str extension = file.path().extension().string();
         if(!extension.empty())
@@ -32,9 +36,12 @@ vpath ListMaker::listOfFiles(cpath path, cvstr acceptableExtensions)
         
         if(vectorContains(acceptableExtensions, extension))
         {
-            printf("  file nr % 3d: %s\n", index, file.path().string().c_str());
+            if(printFoundFiles)
+                printf("  file nr % 3d: %s\n", foundFiles, file.path().string().c_str());
             list.push_back(file.path());
+            ++filesMatch;
         }
     }
+    printf("Found %llu / %lld files matching the extensions\n", filesMatch, foundFiles);
     return list;
 }
