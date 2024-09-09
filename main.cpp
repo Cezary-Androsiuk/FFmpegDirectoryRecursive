@@ -33,9 +33,11 @@
 
 #define IN_DEBUG false
 
+const char *version = "1.3.5";
+
 int main(int argc, const char **argv)
 {
-    printf("\n");
+    printf("\nFFmpegRec version %s\n", version);
 
     fs::path inDirectory;
     vstr extensions;
