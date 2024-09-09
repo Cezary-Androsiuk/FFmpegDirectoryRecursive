@@ -33,7 +33,7 @@
 
 #define IN_DEBUG false
 
-const char *version = "1.3.5";
+const char *version = "1.3.6";
 
 int main(int argc, const char **argv)
 {

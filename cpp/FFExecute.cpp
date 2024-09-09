@@ -379,7 +379,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
 
     int duration = HandlePipeOutput::getInterpretationOfTime(FFTester::getStrDuration());
     HandlePipeOutput::setStringDuration(HandlePipeOutput::splitNumberByThousands(duration, ' '));
-    HandlePipeOutput::printProgress(0, std::to_string(duration));
+    HandlePipeOutput::printProgress(0, HandlePipeOutput::splitNumberByThousands(duration, ' '));
 
 
     
@@ -427,7 +427,7 @@ void FFExecute::runFFmpegForce2(cpath inFile, cpath outFile, cpath moveFile)
     {
         ++ m_correctlyPerformedFFmpegs;
         m_lastExecuteStatus = 0;
-        HandlePipeOutput::printProgress(0, std::to_string(duration));
+        HandlePipeOutput::printProgress(0, HandlePipeOutput::splitNumberByThousands(duration, ' '));
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    FFmpeg finished!\n");
@@ -493,7 +493,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
 
     int duration = HandlePipeOutput::getInterpretationOfTime(FFTester::getStrDuration());
     HandlePipeOutput::setStringDuration(HandlePipeOutput::splitNumberByThousands(duration, ' '));
-    HandlePipeOutput::printProgress(0, std::to_string(duration));
+    HandlePipeOutput::printProgress(0, HandlePipeOutput::splitNumberByThousands(duration, ' '));
 
 
     
@@ -541,7 +541,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     {
         ++ m_correctlyPerformedFFmpegs;
         m_lastExecuteStatus = 0;
-        HandlePipeOutput::printProgress(duration, std::to_string(duration));
+        HandlePipeOutput::printProgress(0, HandlePipeOutput::splitNumberByThousands(duration, ' '));
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    FFmpeg finished!\n");

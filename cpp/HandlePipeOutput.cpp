@@ -190,7 +190,6 @@ void HandlePipeOutput::openFFOFile()
         // will be handled in addTextToFFOFile
         fprintf(stderr, COLOR_RED "Error while oppening ffmpeg output file" COLOR_RESET "!\n");
     }
-    printf("FFOFile oppened!\n");
     m_ffOFileIsOpen = true;
 }
 
