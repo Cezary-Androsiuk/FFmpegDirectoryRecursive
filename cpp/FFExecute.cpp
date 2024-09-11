@@ -141,8 +141,8 @@ void FFExecute::handleStop(cpath inFile, cpath outFile)
         }
         
     }
-    printf("performing ffmpeg stopped due to Ctrl+C combination was pressed\n");
-    HandlePipeOutput::addToFFOFile("performing ffmpeg stopped due to Ctrl+C combination was pressed");
+    printf("performing ffmpeg was stopped, due to Ctrl+C combination was pressed\n");
+    HandlePipeOutput::addToFFOFile("\n\nperforming ffmpeg was stopped, due to Ctrl+C combination was pressed\n");
 }
 
 void FFExecute::moveDateOfFile(cpath from, cpath to)
@@ -398,7 +398,7 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
     {
         ++ m_correctlyPerformedFFmpegs;
         m_lastExecuteStatus = 0;
-        HandlePipeOutput::printProgress(0, HandlePipeOutput::splitNumberByThousands(duration, ' '));
+        HandlePipeOutput::printProgress(duration, HandlePipeOutput::splitNumberByThousands(duration, ' '));
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
         HandlePipeOutput::addToFFOFile("    FFmpeg finished!\n");

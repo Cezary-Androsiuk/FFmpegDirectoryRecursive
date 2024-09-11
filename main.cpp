@@ -34,7 +34,7 @@
 
 #define IN_DEBUG false
 
-#define VERSION "1.3.9"
+#define VERSION "1.3.10"
 const char *versionLine = "FFmpegRec version " VERSION "\n";
 
 int main(int argc, const char **argv)
@@ -108,7 +108,9 @@ int main(int argc, const char **argv)
     deleteDirectoryIfEmpty(outDirectory);
     deleteDirectoryIfEmpty(OFCDirectory);
 
-    printf("Finished all FFmpegs!\n");
+    
+    if(!WinConsoleHandler::combinationCtrlCPressed())
+        printf("Finished all FFmpegs!\n");
 
     OtherError::printErrors();
 }
