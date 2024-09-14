@@ -159,9 +159,25 @@ void FFExecute::moveDateOfFile(cpath from, cpath to)
 
 void FFExecute::moveCorrectlyFinishedFile(cpath from, cpath to)
 {
+    if( !fs::exists(from) )
+    {
+        fprintf(stderr, "    " COLOR_RED "Moving finished file failed" COLOR_RESET "! Source file not exist '%s'\n", from.string().c_str());
+        HandlePipeOutput::addToFFOFile("    Moving finished file failed! Source file not exist '" + from.string() + "'");
+        OtherError::addError(L"Moving finished file failed - Source file not exist '" + from.wstring() + L"'", __PRETTY_FUNCTION__);
+        return;
+    }
+    
+    if( fs::exists(to) )
+    {
+        fprintf(stderr, "    " COLOR_RED "Moving finished file failed" COLOR_RESET "! Output file already exist '%s'\n", to.string().c_str());
+        HandlePipeOutput::addToFFOFile("    Moving finished file failed! Output file already exist '" + to.string() + "'");
+        OtherError::addError(L"Moving finished file failed - Output file already exist '" + to.wstring() + L"'", __PRETTY_FUNCTION__);
+        return;
+    }
+
     try
     {
-        fs::rename(fs::path(from), fs::path(to));
+        fs::rename(from, to);
     }
     catch(std::filesystem::filesystem_error &e)
     {

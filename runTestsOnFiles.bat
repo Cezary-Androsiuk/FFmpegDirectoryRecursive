@@ -93,7 +93,7 @@ for /f "usebackq" %%i in (`powershell -command "Get-Date -Format 'yyyy-MM-dd_HH-
 
 echo -----------------
 echo -----------------
-echo ALL OUTPUT IS IN '%timestamp%.txt' FILE!
+echo ALL OUTPUT IS IN '%timestamp%-[...].txt' FILES!
 echo -----------------
 echo -----------------
 

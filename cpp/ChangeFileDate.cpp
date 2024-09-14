@@ -129,10 +129,10 @@ void ChangeFileDate::addTextToFFOFile(cstr text)
 
 bool ChangeFileDate::fromFileToFile(cpath from, cpath to)
 {
-    if( !fs::exists(from) || !fs::exists(to) )
+    if( !fs::exists(from) )
     {
-        fprintf(stderr, "    one of the files not exist can't change file date '%s' '%s' !\n", from.string().c_str(), to.string().c_str());
-        ChangeFileDate::addTextToFFOFile("one of the files not exist can't change file date '" + from.string() + "' '" + to.string());
+        fprintf(stderr, "    source file '%s' " COLOR_RED "not exist" COLOR_RESET "!", from.string().c_str());
+        ChangeFileDate::addTextToFFOFile("source file '" + from.string() + "' not exist!");
         return false;
     }
     
@@ -148,11 +148,18 @@ bool ChangeFileDate::fromFileToFile(cpath from, cpath to)
     str date = "{ creationTime: " + ChangeFileDate::stringTimeFromSystemTime(&creationTime) + 
         ", modificationTime: " + ChangeFileDate::stringTimeFromSystemTime(&modificationTime) + " }";
 
-    ChangeFileDate::addTextToFFOFile("from file '" + from.string() + "' readed date " + date);
+    ChangeFileDate::addTextToFFOFile("from source file '" + from.string() + "' readed date " + date + "\n");
+    
+    if( !fs::exists(to) )
+    {
+        fprintf(stderr, "    output file '%s' " COLOR_RED "not exist" COLOR_RESET "!", to.string().c_str());
+        ChangeFileDate::addTextToFFOFile("output file '" + to.string() + "' not exist!");
+        return false;
+    }
 
     if(!ChangeFileDate::setFileTime(to.wstring().c_str(), &creationTime, &modificationTime))
     {
-        fprintf(stderr, "    setFileTime method failed!\n");
+        fprintf(stderr, "    setFileTime method failed while!\n");
         ChangeFileDate::addTextToFFOFile("setFileTime method failed!\n");
         return false;
     }
