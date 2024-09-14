@@ -209,9 +209,13 @@ void FFExecute::runFFmpegStandard(fs::path inFile, fs::path outFile, fs::path mo
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
     fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
-    printf("    in:  %s\n", inFile.string().c_str());    HandlePipeOutput::addToFFOFile("    in:  " + inFile.string() + "\n");
-    printf("    out: %s\n", validOutFile.string().c_str());   HandlePipeOutput::addToFFOFile("    out: " + validOutFile.string() + "\n");
-    printf("    move: %s\n", moveFile.string().c_str());   HandlePipeOutput::addToFFOFile("    move: " + moveFile.string() + "\n");
+    printf("    in:  %s\n", inFile.string().c_str());    
+    printf("    out: %s\n", validOutFile.string().c_str());   
+    printf("    move: %s\n", moveFile.string().c_str());   
+    HandlePipeOutput::addToFFOFile(
+        "    in:  " + inFile.string() + "\n"
+        "    out: " + validOutFile.string() + "\n"
+        "    move: " + moveFile.string() + "\n");
 
     // if(!TemporaryRename::makeNameSimple(inFile, validOutFile, moveFile))
     // {
@@ -361,8 +365,9 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         L"\" -c:v libx265 -vtag hvc1 \"" + outFile.wstring() + L"\"";
     command += L" 2>&1"; // move stderr to stdout (connect them)
 
-    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    FFmpeg output:\n");
-    HandlePipeOutput::addToFFOFile("    command: " + str(command.begin(), command.end()) + "\n\n");
+    HandlePipeOutput::addToFFOFile(
+        "\n\n\n\n\n\n    FFmpeg output:\n"
+        "    command: " + str(command.begin(), command.end()) + "\n\n");
 
     int duration = HandlePipeOutput::getInterpretationOfTime(FFTester::getStrDuration());
     HandlePipeOutput::setStringDuration(HandlePipeOutput::splitNumberByThousands(duration, ' '));
@@ -485,18 +490,19 @@ void FFExecute::runFFmpeg(cpath inFile, cpath outFile, cpath moveFile)
         else
             FFExecute::runFFmpegStandard(inFile, outFile, moveFile);
 
-        HandlePipeOutput::addToFFOFile("\n -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --");
-        HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n\n\n\n");
+        HandlePipeOutput::addToFFOFile(
+            "\n -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+            "\n\n\n\n\n\n\n\n\n");
     }
     catch(std::exception &e)
     {
