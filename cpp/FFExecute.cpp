@@ -153,7 +153,7 @@ void FFExecute::moveDateOfFile(cpath from, cpath to)
     {
         fprintf(stderr, "    Changing date of the file " COLOR_RED "failed" COLOR_RESET "\n");
         HandlePipeOutput::addToFFOFile("    Changing date of the file failed");
-        OtherError::addError(L"    Changing date of the file failed", __PRETTY_FUNCTION__);
+        OtherError::addError(L"Changing date of the file failed", __PRETTY_FUNCTION__);
     }
 }
 

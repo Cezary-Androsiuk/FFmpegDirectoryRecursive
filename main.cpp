@@ -95,13 +95,13 @@ int main(int argc, const char **argv)
         
         // handle case, when when the drive disconnect or something
         // but first check if failed
-        if(FFExecute::getLastExecuteStatus() != 0)
+        if(FFExecute::getLastExecuteStatus() == 0)
             continue;
 
         if(!fs::exists(inDirectory));
             continue;
 
-        printf("inDirectory no longer exist!\n");
+        printf(COLOR_RED "inDirectory no longer exist" COLOR_RESET "!\n");
         break;
     }
 
