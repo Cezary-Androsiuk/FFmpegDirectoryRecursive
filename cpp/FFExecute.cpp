@@ -516,3 +516,8 @@ int FFExecute::getLastExecuteStatus()
 {
     return m_lastExecuteStatus;
 }
+
+int FFExecute::getCorrectlyPerformedFFmpegs()
+{
+    return m_correctlyPerformedFFmpegs;
+}

@@ -80,6 +80,7 @@ int main(int argc, const char **argv)
         str filesProgress = FFExecute::makeFileProgressPostfix();
         printf("Status: %s\n\n", filesProgress.c_str()); 
     }
+    bool loopBroken = false;
     for(const auto &inFile : listOfFiles)
     {
         // all files in list are valid at this point
@@ -90,6 +91,7 @@ int main(int argc, const char **argv)
         if(WinConsoleHandler::combinationCtrlCPressed())
         {
             printf("files loop terminated due to Ctrl+C was pressed\n");
+            loopBroken = true;
             break;
         }
         
@@ -102,15 +104,28 @@ int main(int argc, const char **argv)
             continue;
 
         printf(COLOR_RED "inDirectory no longer exist" COLOR_RESET "!\n");
+        loopBroken = true;
         break;
     }
 
     deleteDirectoryIfEmpty(outDirectory);
     deleteDirectoryIfEmpty(OFCDirectory);
 
-    
-    if(!WinConsoleHandler::combinationCtrlCPressed())
-        printf("Finished all FFmpegs!\n");
+    if(!loopBroken)
+    {
+        int correctlyPerformedFFmpegs = FFExecute::getCorrectlyPerformedFFmpegs();
+        double correctlyPerformedRatio = 
+            static_cast<double>(correctlyPerformedFFmpegs) / static_cast<double>(listOfFiles.size());
+
+        if(correctlyPerformedRatio == 1.0)
+            printf(COLOR_GREEN "Finished all FFmpegs" COLOR_RESET "!\n");
+        else
+            printf(COLOR_WHITE "Finished " COLOR_RED "%g%%" COLOR_WHITE " of FFmpegs" COLOR_RESET "!\n", correctlyPerformedRatio * 100);
+    }
+    else
+    {
+        printf(COLOR_RED "Program was stopped" COLOR_RESET "!\n");
+    }
 
     OtherError::printErrors();
 }

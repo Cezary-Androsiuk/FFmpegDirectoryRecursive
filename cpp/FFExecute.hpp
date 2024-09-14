@@ -63,6 +63,7 @@ public:
     static void setSkipAction(SkipAction skipAction);
     static void runFFmpeg(cpath inFile, cpath outFile, cpath moveFile);
     static int getLastExecuteStatus();
+    static int getCorrectlyPerformedFFmpegs();
 
 private:
     static int m_performedFFmpegs;
