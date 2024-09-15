@@ -239,6 +239,9 @@ void FFExecute::runFFmpegStandard(fs::path inFile, fs::path outFile, fs::path mo
     //     ADD_OTHER_ERROR(L"restoring original name failed for " + inFile.wstring());
     // }
 
+    HandlePipeOutput::addToFFOFile("    Operation completed at " + HandlePipeOutput::getCurrentTime() + "\n");
+    
+
     if(WinConsoleHandler::combinationCtrlCPressed()) {
         FFExecute::handleStop(inFile, validOutFile);
         // just exist if pressed Ctrl+C
