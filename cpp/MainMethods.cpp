@@ -86,7 +86,7 @@ bool handleArgs(int argc, const char **argv, void *arguments[])
         printf("ffmpegRec :1 :2 :3\n");
         printf("  :1 - path to execute ffmpeg in it\n");
         printf("  :2 - extensions to look for, can be separated by ,/\\?;+\n");
-        printf("  :3 - action when file is already H265 [skip/copy/move/test/force]\n");
+        printf("  :3 - action when file is already H265 [skip/copy/move/test/force] (optional)\n");
     }
 #endif
     return exitValue;
@@ -95,7 +95,7 @@ bool handleArgs(int argc, const char **argv, void *arguments[])
 bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr *const extensions, SkipAction *const skipAction)
 {
     FUNC_START
-    if(argc < 4)
+    if(argc < 3)
     {
         lastError = L"To few arguments!";
         return false;
@@ -103,7 +103,11 @@ bool argsValidConst(int argc, const char **argv, fs::path *const directory, vstr
 
     fs::path givenDirectory = argv[1];
     vstr givenExtensions = splitExtensionsInput( str(argv[2]) );
-    SkipAction givenSkipAction = handleInputSkipAction( str(argv[3]) );
+    SkipAction givenSkipAction;
+    if(argc < 4) // SkipAction was not given
+        givenSkipAction = DEFAULT_SKIP_ACTION;
+    else // something was given as the fourth argument
+        givenSkipAction = handleInputSkipAction( str(argv[3]) ); 
     
     if(!fs::exists( givenDirectory ))
     {
