@@ -100,7 +100,7 @@ int main(int argc, const char **argv)
         if(FFExecute::getLastExecuteStatus() == 0)
             continue;
 
-        if(!fs::exists(inDirectory));
+        if(fs::exists(inDirectory));
             continue;
 
         printf(COLOR_RED "inDirectory no longer exist" COLOR_RESET "!\n");
