@@ -96,7 +96,7 @@ int main(int argc, const char **argv)
         }
         
         // handle case, when when the drive disconnect or something
-        if(fs::exists(inDirectory));
+        if(fs::exists(inDirectory))
             continue;
 
         printf(COLOR_RED "inDirectory no longer exist" COLOR_RESET "!\n");
