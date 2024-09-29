@@ -12,16 +12,16 @@ void OtherError::printErrors()
 {
     if(m_errors.empty())
     {
-        printf(COLOR_GREEN "In meantime, no other errors occured" COLOR_RESET ".\n");
+        printf("In meantime," COLOR_GREEN " no other errors occured" COLOR_RESET ".\n");
         return;
     }
 
-    printf(COLOR_RED "In meantime, " COLOR_WHITE "%d" COLOR_RED 
-        " other errors occured" COLOR_RESET ":\n", m_errors.size());
+    printf("In meantime, " COLOR_RED "%d other errors occured" COLOR_RESET 
+        ":\n", m_errors.size());
     int index = 0;
     for(const auto &error : m_errors)
     {
-        printf("% 5d - %ls\n", ++index, error.c_str());
+        printf("  " COLOR_RED "% 5d" COLOR_RESET " - %ls\n", ++index, error.c_str());
     }
 }
 

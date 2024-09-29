@@ -5,6 +5,7 @@ std::ofstream HandlePipeOutput::m_ffOFile;
 fs::path HandlePipeOutput::m_ffOFileDirectory;
 fs::path HandlePipeOutput::m_ffOFilePath;
 bool HandlePipeOutput::m_ffOFileIsOpen = false;
+bool HandlePipeOutput::m_lastFFOFileWriteFailed = false;
 const char *HandlePipeOutput::m_versionToSave = nullptr;
 
 
@@ -136,14 +137,27 @@ void HandlePipeOutput::addTextToFFOFile(cstr line)
 {
     if(!m_ffOFileIsOpen)
     {
-        printf(COLOR_RED "FFOFile was not oppened yet!\n" COLOR_RESET);
+        if(!m_lastFFOFileWriteFailed) // if last failed, then do not add multiple errors (spam protection)
+        {
+            printf(COLOR_RED "FFOFile was not oppened yet!\n" COLOR_RESET);
+            OtherError::addError(L"FFOFile was not oppened while trying to write", __PRETTY_FUNCTION__);
+        }
         return;
     }
 
     if(!m_ffOFile.good())
-        printf("ffmpeg output file failed, output text: %s\n", line.c_str());
+    {
+        if(!m_lastFFOFileWriteFailed) // if last failed, then do not add multiple errors (spam protection)
+        {
+            OtherError::addError(L"FFOFile failed to write", __PRETTY_FUNCTION__);
+        }
+        m_lastFFOFileWriteFailed = true;
+    }
     else
+    {
         m_ffOFile << line;
+        m_lastFFOFileWriteFailed = false;
+    }
 }
 
 

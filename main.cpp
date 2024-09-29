@@ -99,7 +99,7 @@ int main(int argc, const char **argv)
         if(fs::exists(inDirectory))
             continue;
 
-        printf(COLOR_RED "inDirectory no longer exist" COLOR_RESET "!\n");
+        printf("inDirectory" COLOR_RED " no longer exist" COLOR_RESET "!\n");
         loopBroken = true;
         break;
     }
@@ -120,7 +120,8 @@ int main(int argc, const char **argv)
     }
     else
     {
-        printf(COLOR_RED "Program was stopped" COLOR_RESET "!\n");
+        // printf(COLOR_RED "Program was stopped" COLOR_RESET "!\n");
+        printf("Program was stopped!\n");
     }
 
     OtherError::printErrors();

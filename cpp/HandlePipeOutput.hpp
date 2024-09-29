@@ -63,6 +63,7 @@ public:
 
 private:
     static bool m_ffOFileIsOpen;
+    static bool m_lastFFOFileWriteFailed;
     static std::string m_stringDuration;
     static std::ofstream m_ffOFile; // ffOFile is FFmpegOutputFile
     static fs::path m_ffOFileDirectory; // ffOFile is FFmpegOutputFile
