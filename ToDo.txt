@@ -1,0 +1,17 @@
+1. change in, out and move paths displayed in command prompt and in FFOFile to relative with inDirectory (add setter for inDirectory to FFExecute)
+ - add inDirectory to FFOFile
+ - at the end add info about inDirectory example: "Finished all FFmpegs in [inDirectory]!"
+
+2. add possibility to run ffmpegRec while ffmpeg and source files directories already exist
+ - analyze content of the directories
+    - check if in ffmpeg dir none file colidate with files in inDirectory
+       - if any match, check if is valid, if not and inDirectory file is valid, then can be replaced
+    - check if all files in source files directory match with those in ffmpeg directory (and vice versa)
+    - you know... do the smart stuff 
+       - i mean, prove that, the ffmpeg and source files directories are not leftovers from previous compresion, are not a random names
+       - helpfull might be thinking that user want to continue the compresion (due to Ctrl+C or random malfunction) or that user added some new files to inDirectory (during the previous compression)
+
+3. add more advanced protection to the "disconected disk" case
+ - if inDirectory failed and cannot be found, 
+    - start a loop that refreshes every x seconds and checks if inDirectory exist
+    - if directory suddenly appear wait y seconds, remove previous outFile (if exist) and retry the same file compression that failed
