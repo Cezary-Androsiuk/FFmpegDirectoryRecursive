@@ -38,6 +38,11 @@ typedef const fs::path &cpath;
 #define wpipeOpen(...) _wpopen(__VA_ARGS__)
 #define pipeClose(...) _pclose(__VA_ARGS__)
 
+#define _CMDT(text) L" \"" + (text) + L"\" " /* command text */
+#define FFMPEG_COMMAND(input, output) \
+    L"ffmpeg -i" _CMDT(input) L"-c:v libx265 -vtag hvc1" _CMDT(output) \
+    L"2>&1"; // move stderr to stdout (connect them)
+
 class FFExecute
 {
     static fs::path changeOutputFileNameIfNeeded(fs::path path);
@@ -52,10 +57,14 @@ class FFExecute
     static void moveCorrectlyFinishedFile(cpath from, cpath to);
     
     static void runFFmpegTest(cpath inFile);
-    static void runFFmpegStandard(fs::path inFile, fs::path outFile, fs::path moveFile);
+    static void runFFmpegStandard(cpath inFile, fs::path outFile, cpath moveFile);
     
-    static void runFFmpegTest2(cpath inFile);
-    static void runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile);
+    static bool _existCase(cpath inFile);
+    static bool _testPipePart(cpath inFile);
+    static bool _ffprobePartForTest(cpath inFile);
+    static bool _ffprobePartForStandard(cpath inFile, cpath outFile);
+    static bool _ffmpegPartForStandard(cpath inFile, cpath outFile);
+
 
 public:
     static str makeFileProgressPostfix(bool addColors = true);

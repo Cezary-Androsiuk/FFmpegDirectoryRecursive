@@ -191,59 +191,61 @@ void FFExecute::moveCorrectlyFinishedFile(cpath from, cpath to)
 
 void FFExecute::runFFmpegTest(cpath inFile)
 {
-    printf("Status: %s", FFExecute::makeFileProgressPostfix().c_str());
-    FFExecute::runFFmpegTest2(inFile);
+    printf("  Starting new FFprobe\n");          
+    HandlePipeOutput::addToFFOFile("Starting new FFprobe\n");
+
+    printf("    in:   %s\n", inFile.string().c_str());
+    HandlePipeOutput::addToFFOFile("in:   " + inFile.string() + "\n");
+
+    do{ // independent block of code
+
+        if(!FFExecute::_existCase(inFile)) break;
+        if(!FFExecute::_testPipePart(inFile)) break;
+        if(!FFExecute::_ffprobePartForTest(inFile)) break; // if statement is very important, do not delete that! 
+
+    }while(false);
+
+    HandlePipeOutput::addToFFOFile("\n\nOperation finished at " + HandlePipeOutput::getCurrentTime() + "\n");
+
     if(WinConsoleHandler::combinationCtrlCPressed()) return; // just exist if pressed Ctrl+C
 
     ++ m_performedFFmpegs;
-    if(m_performedFFmpegs == m_totalFFmpegsToPerform)
-        printf("\nStatus: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
 
-    HandlePipeOutput::addToFFOFile("\n    Status " + FFExecute::makeFileProgressPostfix(false) + "\n");
+    printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
+    HandlePipeOutput::addToFFOFile("Status " + FFExecute::makeFileProgressPostfix(false));
 }
 
-void FFExecute::runFFmpegStandard(fs::path inFile, fs::path outFile, fs::path moveFile)
+void FFExecute::runFFmpegStandard(cpath inFile, fs::path outFile, cpath moveFile)
 {
-    printf("  Starting new FFmpeg\n");          HandlePipeOutput::addToFFOFile("  Starting new ffmpeg\n");
+    printf("  Starting new FFmpeg\n");          
+    HandlePipeOutput::addToFFOFile("Starting new FFmpeg\n");
 
     // check if out file exist (case when in input dir are exist files 1.mp4 and 1.mkv)
-    fs::path validOutFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
+    outFile = FFExecute::changeOutputFileNameIfNeeded(outFile);
 
-    printf("    in:   %s\n", inFile.string().c_str());    
-    printf("    out:  %s\n", validOutFile.string().c_str());   
-    printf("    move: %s\n", moveFile.string().c_str());   
-    HandlePipeOutput::addToFFOFile(
-        "    in:   " + inFile.string() + "\n"
-        "    out:  " + validOutFile.string() + "\n"
-        "    move: " + moveFile.string() + "\n");
+    printf("    in:   %s\n", inFile.string().c_str());
+    printf("    out:  %s\n", outFile.string().c_str());
+    printf("    move: %s\n", moveFile.string().c_str());
+    HandlePipeOutput::addToFFOFile("in:   " + inFile.string() + "\n");
+    HandlePipeOutput::addToFFOFile("out:  " + outFile.string() + "\n");
+    HandlePipeOutput::addToFFOFile("move: " + moveFile.string() + "\n");
 
-    // if(!TemporaryRename::makeNameSimple(inFile, validOutFile, moveFile))
-    // {
-    //     printf(COLOR_RED "making name simpler failed" COLOR_RESET "!\n");
-    //     HandlePipeOutput::addToFFOFile(L"Making name simpler failed in '"+ inFile.wstring() +L"'!\n");
-    //     ++ m_failedFFmpegs;
-    //     m_lastExecuteStatus = 1;
-    //     return;
-    // }
-    // HandlePipeOutput::addTextToFFOFile(TemporaryRename::getRenameInfo());
+    do{ // independent block of code
+        
+        if(!FFExecute::_existCase(inFile)) return;
+        if(!FFExecute::_testPipePart(inFile)) return;
+        if(!FFExecute::_ffprobePartForStandard(inFile, outFile)) return;
+        if(!FFExecute::_ffmpegPartForStandard(inFile, outFile)) return;
 
-    // printf("    inTmp:  %ls\n", inFile.wstring().c_str());    HandlePipeOutput::addToFFOFile(L"    inTmp:  " + inFile.wstring() + L"\n");
-    // printf("    outTmp: %ls\n", validOutFile.wstring().c_str());   HandlePipeOutput::addToFFOFile(L"    outTmp: " + validOutFile.wstring() + L"\n");
-    // printf("    moveTmp: %ls\n", moveFile.wstring().c_str());   HandlePipeOutput::addToFFOFile(L"    moveTmp: " + moveFile.wstring() + L"\n");
+        // move finished files to directory, that contains finished files
+        FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
 
-    FFExecute::runFFmpegStandard2(inFile, validOutFile, moveFile);
+    }while(false);
 
-    // if(!TemporaryRename::restoreName(inFile, validOutFile, moveFile))
-    // {
-    //     printf(COLOR_RED "restoring original names failed" COLOR_RESET "!\n");
-    //     ADD_OTHER_ERROR(L"restoring original name failed for " + inFile.wstring());
-    // }
-
-    HandlePipeOutput::addToFFOFile("    Operation completed at " + HandlePipeOutput::getCurrentTime() + "\n");
+    HandlePipeOutput::addToFFOFile("\n\nOperation finished at " + HandlePipeOutput::getCurrentTime() + "\n");
     
-
     if(WinConsoleHandler::combinationCtrlCPressed()) {
-        FFExecute::handleStop(inFile, validOutFile);
+        FFExecute::handleStop(inFile, outFile);
         // just exist if pressed Ctrl+C
         return;
     }
@@ -251,86 +253,69 @@ void FFExecute::runFFmpegStandard(fs::path inFile, fs::path outFile, fs::path mo
     ++ m_performedFFmpegs;
     
     printf("    Status: %s\n\n", FFExecute::makeFileProgressPostfix().c_str());
-    HandlePipeOutput::addToFFOFile("\n    Status " + FFExecute::makeFileProgressPostfix(false));
+    HandlePipeOutput::addToFFOFile("Status " + FFExecute::makeFileProgressPostfix(false));
 }
 
-void FFExecute::runFFmpegTest2(cpath inFile)
+bool FFExecute::_existCase(cpath inFile)
 {
-    str inFileStr = inFile.string();
-    printf("  in:   %s\n", inFileStr.c_str());    HandlePipeOutput::addToFFOFile("    in:   " + inFileStr + "\n");
-    
-    HandlePipeOutput::addToFFOFile("  Starting new ffmpeg\n");
-    HandlePipeOutput::addToFFOFile("    in:  " + inFileStr + "\n");
-    
     // seprate case when input file not exist
     if(!fs::exists(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
-        HandlePipeOutput::addToFFOFile("    Input file not exist!\n");
+        HandlePipeOutput::addToFFOFile("Input file not exist!\n");
         ++ m_failedFFmpegs;
         m_lastExecuteStatus = 1;
-        return;
+        return false;
     }
+    return true;
+}
 
-    HandlePipeOutput::addToFFOFile("\n    TestPipe output:\n");
+bool FFExecute::_testPipePart(cpath inFile)
+{
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\nTestPipe output:\n");
     TestPipe::setHandleDirOutput(HandlePipeOutput::addToFFOFile);
     if(!TestPipe::testName(inFile))
     {
         fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
-        HandlePipeOutput::addToFFOFile("    Input file cannot be passed as argument to other program!\n");
+        HandlePipeOutput::addToFFOFile("Input file cannot be passed as argument to other program!\n");
         ++ m_failedFFmpegs;
         m_lastExecuteStatus = 1;
-        return;
+        return false;
     }
+    return true;
+}
 
-    HandlePipeOutput::addToFFOFile("\n    FFprobe output:\n");
+bool FFExecute::_ffprobePartForTest(cpath inFile)
+{
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\nFFprobe output:\n");
     FFTester::setHandleFFprobeOutput(HandlePipeOutput::addToFFOFile);
 
     if(!FFTester::canBeConvertedToH265(inFile, false))
     {
         if(FFTester::errorOccur())
         {
-            fprintf(stderr, "    error occur while checking if file is H265: %s\n", 
+            fprintf(stderr, "    Error occur while checking if file is H265: %s\n", 
                 FFTester::getErrorInfo().c_str());
-            HandlePipeOutput::addToFFOFile("    error occur while checking if file is H265: " + 
+            HandlePipeOutput::addToFFOFile("Error occur while checking if file is H265: " + 
                 FFTester::getErrorInfo() + "\n");
             ++ m_failedFFmpegs;
             m_lastExecuteStatus = 1;
-            return;
+            return false;
         }
 
         ++ m_skippedFFmpegs;
         m_lastExecuteStatus = 2;
-        return;
+        return false;
     }
     ++ m_correctlyPerformedFFmpegs;
     m_lastExecuteStatus = 0;
+
+    return true;
 }
 
-void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
+bool FFExecute::_ffprobePartForStandard(cpath inFile, cpath outFile)
 {
-    // seprate case when input file not exist
-    if(!fs::exists(inFile))
-    {
-        fprintf(stderr, "    " COLOR_RED "Input file not exist" COLOR_RESET "!\n");
-        HandlePipeOutput::addToFFOFile("    Input file not exist!\n");
-        ++ m_failedFFmpegs;
-        m_lastExecuteStatus = 1;
-        return;
-    }
-
-    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    TestPipe output:\n");
-    TestPipe::setHandleDirOutput(HandlePipeOutput::addToFFOFile);
-    if(!TestPipe::testName(inFile))
-    {
-        fprintf(stderr, "    " COLOR_RED "Input file cannot be passed as argument to other program" COLOR_RESET "!\n");
-        HandlePipeOutput::addToFFOFile("    Input file cannot be passed as argument to other program!\n");
-        ++ m_failedFFmpegs;
-        m_lastExecuteStatus = 1;
-        return;
-    }
-
-    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\n    FFprobe output:\n");
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\nFFprobe output:\n");
     FFTester::setHandleFFprobeOutput(HandlePipeOutput::addToFFOFile);
 
     if(!FFTester::canBeConvertedToH265(inFile))
@@ -339,62 +324,57 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         {
             if(m_skipAction == SkipAction::Force)
             {
-                fprintf(stderr, "    error occur while executing FFTester: %s\n", 
+                fprintf(stderr, "    Error occur while executing FFTester: %s\n", 
                     FFTester::getErrorInfo().c_str());
-                HandlePipeOutput::addToFFOFile("    error occur while executing FFTester: " + 
+                HandlePipeOutput::addToFFOFile("Error occur while executing FFTester: " + 
                     FFTester::getErrorInfo() + "\n");
             }
             else
             {
-                fprintf(stderr, "    error occur while executing FFTester, unable to check"
+                fprintf(stderr, "    Error occur while executing FFTester, unable to check"
                     " if file is H265: %s\n", FFTester::getErrorInfo().c_str());
-                HandlePipeOutput::addToFFOFile("    error occur while checking if file "
+                HandlePipeOutput::addToFFOFile("Error occur while checking if file "
                     "is H265: " + FFTester::getErrorInfo() + "\n");
             }
             ++ m_failedFFmpegs;
             m_lastExecuteStatus = 1;
-            return;
+            return false;
         }
 
         if(m_skipAction != SkipAction::Force)
         {
             FFExecute::handleAlreadyH265File(inFile, outFile); // m_skippedFFmpegs are there
             m_lastExecuteStatus = 1;
-            return;
+            return false;
         }
     }
+    return true;
+}
 
-    std::wstring command = L"ffmpeg -i \"" + inFile.wstring() + 
-        L"\" -c:v libx265 -vtag hvc1 \"" + outFile.wstring() + L"\"";
-    command += L" 2>&1"; // move stderr to stdout (connect them)
+bool FFExecute::_ffmpegPartForStandard(cpath inFile, cpath outFile)
+{
+    std::wstring command = FFMPEG_COMMAND(inFile.wstring(), outFile.wstring());
 
-    HandlePipeOutput::addToFFOFile(
-        "\n\n\n\n\n\n    FFmpeg output:\n"
-        "    command: " + str(command.begin(), command.end()) + "\n\n");
+    HandlePipeOutput::addToFFOFile("\n\n\n\n\n\nFFmpeg output:\n");
+    HandlePipeOutput::addToFFOFile("Command: " + toString(command) + "\n\n");
 
     int duration = HandlePipeOutput::getInterpretationOfTime(FFTester::getStrDuration());
     HandlePipeOutput::setStringDuration(HandlePipeOutput::splitNumberByThousands(duration, ' '));
     HandlePipeOutput::printProgress(0, HandlePipeOutput::splitNumberByThousands(duration, ' '));
 
-
-    
     FILE* pipe = wpipeOpen(command.c_str(), L"r");
     if (!pipe) {
         fprintf(stderr, "    " COLOR_RED "Cannot open the pipe" COLOR_RESET "!\n");
-        HandlePipeOutput::addToFFOFile("    Cannot open the pipe!\n");
+        HandlePipeOutput::addToFFOFile("Cannot open the pipe!\n");
         ++ m_failedFFmpegs;
         m_lastExecuteStatus = 1;
-        return;
+        return false;
     }
 
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
     {
-        if(WinConsoleHandler::combinationCtrlCPressed())
-        {
-            // no exit status, all stops
-            return;
-        }
+        if(WinConsoleHandler::combinationCtrlCPressed()) return false; // no exit status, all stops
         
         try
         {
@@ -402,38 +382,34 @@ void FFExecute::runFFmpegStandard2(cpath inFile, cpath outFile, cpath moveFile)
         }
         catch(const std::exception& e)
         {
-            printf("error while handling output in FFExecute\n");
+            printf("Error while handling output in FFExecute\n");
         }
     }
 
     int ffmpegExitCode = pipeClose(pipe);
 
-
-    
     if(ffmpegExitCode) // not equal 0 - error occur in ffmpeg
     {
         ++ m_failedFFmpegs;
         m_lastExecuteStatus = 1;
         printf("\n");
         fprintf(stderr, "    FFmpeg " COLOR_RESET COLOR_RED "failed" COLOR_RESET " with code %d!\n", ffmpegExitCode);
-        HandlePipeOutput::addToFFOFile("    FFmpeg failed with code " + std::to_string(ffmpegExitCode) + "!\n");
+        HandlePipeOutput::addToFFOFile("FFmpeg failed with code " + std::to_string(ffmpegExitCode) + "!\n");
+        return false;
     }
-    else // no error - ffmpeg finished correctly
-    {
-        ++ m_correctlyPerformedFFmpegs;
-        m_lastExecuteStatus = 0;
-        HandlePipeOutput::printProgress(duration, HandlePipeOutput::splitNumberByThousands(duration, ' '));
-        printf("\n");
-        fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
-        HandlePipeOutput::addToFFOFile("    FFmpeg finished!\n");
 
-        // change create/update date of compressed file
-        FFExecute::moveDateOfFile(inFile, outFile);
-        
-        // move finished files to directory, that contains finished files
-        FFExecute::moveCorrectlyFinishedFile(inFile, moveFile);
-    }
+    ++ m_correctlyPerformedFFmpegs;
+    m_lastExecuteStatus = 0;
+    HandlePipeOutput::printProgress(duration, HandlePipeOutput::splitNumberByThousands(duration, ' '));
+    printf("\n");
+    fprintf(stderr, "    FFmpeg " COLOR_GREEN "finished" COLOR_RESET "!\n");
+    HandlePipeOutput::addToFFOFile("FFmpeg finished!\n");
+
+    // change create/update date of compressed file
+    FFExecute::moveDateOfFile(inFile, outFile);
+    return true;
 }
+
 
 str FFExecute::makeFileProgressPostfix(bool addColors)
 {
@@ -493,9 +469,8 @@ void FFExecute::runFFmpeg(cpath inFile, cpath outFile, cpath moveFile)
         else
             FFExecute::runFFmpegStandard(inFile, outFile, moveFile);
 
-        HandlePipeOutput::addToFFOFile( "\n" + HandlePipeOutput::getCurrentTime() );
         HandlePipeOutput::addToFFOFile(
-            " -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "
+            "\n-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "
             "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "
             "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "
             "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "

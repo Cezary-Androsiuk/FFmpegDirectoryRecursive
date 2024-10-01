@@ -390,7 +390,7 @@ void HandlePipeOutput::cleanFFOFile()
         OtherError::addError(L"Error while renaming tempFFOfile to m_ffOFilePath: " + toWideString(e.what()), __PRETTY_FUNCTION__);
         return;
     }
-    printf("FFOFile cleaned successfully!\n");
+    // printf("FFOFile cleaned successfully!\n");
 }
 
 
