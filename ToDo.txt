@@ -15,3 +15,9 @@
  - if inDirectory failed and cannot be found, 
     - start a loop that refreshes every x seconds and checks if inDirectory exist
     - if directory suddenly appear wait y seconds, remove previous outFile (if exist) and retry the same file compression that failed
+
+4. remove old flexible argument function and add new with extensions mp4+mkv+m4a+mov+avi
+
+5. fix invalid agruments info text
+
+6. fix Ctrl+C not deleting files

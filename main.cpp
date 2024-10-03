@@ -59,6 +59,12 @@ int main(int argc, const char **argv)
     // create list of files
     vpath listOfFiles = ListMaker::listOfFiles(inDirectory, extensions); // listOfFiles method also prints files
     
+    if(listOfFiles.empty())
+    {
+        printf("List of files to compress is " COLOR_RED "empty" COLOR_RESET "!\n");
+        return 1;
+    }
+
     fs::path outDirectory, OFCDirectory;
     if(skipAction != SkipAction::Test)
     {
@@ -125,4 +131,5 @@ int main(int argc, const char **argv)
     }
 
     OtherError::printErrors();
+    return 0;
 }
